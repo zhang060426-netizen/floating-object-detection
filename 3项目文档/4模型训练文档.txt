@@ -1,0 +1,45 @@
+
+水面漂浮物检测系统 - 模型训练
+========================
+
+1. 数据集介绍
+----------
+1.1 水面漂浮物数据集: other/model_train/detect/dataset/all_dataset
+- 数据集来源：https://www.modelscope.cn/datasets/Echo0174/Trash_floater
+- 总样本数：5544张水面图片
+- 训练集：4032张图片 (用于模型训练)
+- 验证集：907张图片 (用于模型验证和性能调优)
+- 测试集：605张图片 (用于模型最终性能评估)
+
+1.2 检测类别: 1类漂浮物检测
+   0: floating_object - 漂浮物 - 水面漂浮垃圾等漂浮物
+
+2. 模型训练介绍
+----------
+2.1 支持的模型: other/model_train/detect/weights
+- yolov8n.pt 
+- yolo11n.pt
+- yolo12n.pt 
+- yolo26n.pt
+
+2.2 模型训练命令
+- 进入模型训练根目录: cd other/model_train/detect
+- 激活python环境: conda activate py12
+- 执行训练脚本: python code/train.py
+- 执行验证脚本: python code/val.py
+- 执行预测脚本: python code/predict.py
+
+2.3 结果保存路径
+- 训练结果: other/model_train/detect/output/train
+- 测试结果: other/model_train/detect/output/val
+- 预测结果: other/model_train/detect/output/predict
+- 已经训练好的结果: other/model_train/detect/output/已经训练好的模型和测试结果
+
+3. 模型性能评估
+----------
+3.1 整体性能指标
+基于训练好的模型在测试集（605张图片，4190个目标实例）上的表现：
+- precision (精确率): 0.889
+- recall (召回率): 0.827
+- mAP50 (IoU阈值0.5时的平均精度): 0.915
+- mAP50-95 (IoU阈值0.5-0.95的平均精度): 0.659

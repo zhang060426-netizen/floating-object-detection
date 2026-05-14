@@ -1,0 +1,13 @@
+node_modules/
+__pycache__/
+*.pyc
+.cache/
+.omx/cache/
+dist/
+build/
+.env
+*.pt
+*.pth
+*.onnx
+uploads/
+results/

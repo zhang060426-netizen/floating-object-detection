@@ -1,0 +1,2 @@
+Class     Images  Instances      Box(P          R      mAP50  mAP50-95):
+  all        605       4190      0.889      0.827      0.915      0.659

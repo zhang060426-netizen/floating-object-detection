@@ -1,0 +1,30 @@
+{
+  "active": false,
+  "current_phase": "complete",
+  "lifecycle_outcome": "finished",
+  "run_outcome": "finish",
+  "task_description": "Summarize Phase 2A agent deliverables and decide Phase 2B Gate",
+  "artifact": "PHASE2A_MASTER_SUMMARY.md",
+  "phase1_audit_complete": true,
+  "phase1_source_fact_complete": false,
+  "phase2_code_ready": false,
+  "phase2_docs_ready": true,
+  "must_restore_sources": [
+    "web-vue",
+    "web-flask"
+  ],
+  "completed_at": "2026-05-13T10:57:52.768Z",
+  "phase": "Phase 2A",
+  "artifacts": [
+    "PHASE2A_SYSTEM_CONTRACT_REBUILD_PLAN.md",
+    ".omx/plans/phase2a-system-contract-rebuild-plan-20260513.md"
+  ],
+  "business_code_changed": false,
+  "training_run": false,
+  "db_modified": false,
+  "next": "Agents write contract documents under agent_outputs only",
+  "phase2a_deliverables_complete": true,
+  "phase2a_quality_closure": "conditional",
+  "phase2b_gate": "BLOCKED",
+  "source_restored": false
+}

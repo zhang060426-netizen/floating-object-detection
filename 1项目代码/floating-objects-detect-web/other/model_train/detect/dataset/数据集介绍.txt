@@ -1,0 +1,7 @@
+数据集来源：
+https://www.modelscope.cn/datasets/Echo0174/Trash_floater
+
+数据集数量：
+训练集：4032个样例
+验证集：907个样例
+测试集：605个样例

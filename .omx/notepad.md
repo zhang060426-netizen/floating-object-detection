@@ -1,0 +1,13 @@
+
+
+## PRIORITY
+Source recovery decision: complete web-vue/web-flask business source is unrecoverable. Move from Phase2A recovery search to Phase2B pre-development planning for minimal runnable rebuild. Still no business code until gates pass. Scope: login, image detection, model loading, detection record save; defer video/realtime/Word/report/dashboard polish.
+
+## WORKING MEMORY
+[2026-05-13T10:16:28.114Z] Created PHASE1_AUDIT_STATUS.md documenting restored context, actual source root, Phase 1 blockers, and Leader dispatch. Key: front/back source missing except package/requirements+notes; AI and test resources available.
+
+[2026-05-13T10:57:34.508Z] Generated PHASE1_MASTER_SUMMARY.md from FE/BE/AI/DOC Phase 1 audits. Decision: Phase 1 audit deliverables complete, but source-fact confirmation incomplete due missing web-vue/src and web-flask app/routes/services/db. Not ready for Phase2 runnable/code baseline; only Phase2A docs/contracts/source recovery. Must first locate/restore web-vue/web-flask before Phase2B.
+[2026-05-13T11:15:36.636Z] Entered Phase 2A: system contracts/rebuild baseline. Created PHASE2A_SYSTEM_CONTRACT_REBUILD_PLAN.md and .omx/plans/phase2a-system-contract-rebuild-plan-20260513.md. No business code, no source restoration, no training/db/API replacement. Plan defines task board, agent outputs, contract owners, completion criteria, Phase2B gates.
+[2026-05-13T11:55:18.649Z] Generated PHASE2A_MASTER_SUMMARY.md. Read all 21 Phase2A deliverables. Decision: Phase2A deliverables complete but conditional due stale CONTRACT_INDEX/PHASE2B_GATE_CHECKLIST statuses. Contracts are present but evidence mostly doc/resource/inference. Phase2B Gate = BLOCKED due missing web-vue/web-flask source/runtime, DB init, app inference, file storage, best.pt risk.
+[2026-05-14T11:16:31.952Z] User confirmed web-vue and web-flask complete business source cannot be recovered. Update coordination stance: Phase2B Gate no longer blocked on 'unknown source recovery'; now blocked on pre-dev gates: git/worktree setup decision, frozen minimal rebuild scope, contract freeze, DB/file/model baseline, smoke resources. Do not write business code yet.
+[2026-05-14T11:27:07.443Z] Created PHASE2B_PRE_DEV_FREEZE.md (pre-dev freeze only, no business code). It freezes minimal rebuild scope: login, image detection, model loading, detection record save; defers video/realtime/Word/dashboard/training/full dataset management. Verified no web-vue/src, index.html, web-flask app.py/routes/services/db were created.

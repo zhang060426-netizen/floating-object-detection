@@ -1,0 +1,32 @@
+{
+  "active": false,
+  "current_phase": "complete",
+  "lifecycle_outcome": "finished",
+  "run_outcome": "finish",
+  "task_description": "Write Phase 2B pre-development freeze document",
+  "coordination_phase": "Phase 2B pre-dev freeze",
+  "phase1": "complete",
+  "phase2a": "complete_conditional",
+  "source_recovery": "unrecoverable_confirmed_by_user",
+  "phase2b_gate": "PRE_DEV_FROZEN_NOT_YET_PASS",
+  "business_code_changed": false,
+  "minimal_scope": [
+    "login",
+    "image_detection",
+    "model_loading",
+    "detection_record_save"
+  ],
+  "deferred_scope": [
+    "video_detection",
+    "realtime_detection",
+    "word_report",
+    "dashboard_polish"
+  ],
+  "next": "git status/init and baseline commit, then create worktrees before business code",
+  "owner_omx_session_id": "omx-1778755155581-tt8dub",
+  "completed_at": "2026-05-14T11:16:50.463Z",
+  "artifact": "PHASE2B_PRE_DEV_FREEZE.md",
+  "source_dirs_created": false,
+  "db_modified": false,
+  "model_weights_modified": false
+}
