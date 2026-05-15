@@ -1,0 +1,10 @@
+﻿.pytest_cache/
+__pycache__/
+*.pyc
+storage/app.sqlite3
+storage/uploads/*
+storage/results/*
+storage/models/*
+!storage/uploads/.gitkeep
+!storage/results/.gitkeep
+!storage/models/.gitkeep
