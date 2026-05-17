@@ -1,4 +1,4 @@
-﻿# Phase 2B Batch1 Smoke Test Report
+# Phase 2B Batch1 Smoke Test Report
 
 更新时间：2026-05-15  
 阶段：Phase 2B Batch1 / Smoke Test Report  
@@ -190,3 +190,250 @@ agent_outputs/docs/PHASE2B_BATCH1_SMOKE_TEST_REPORT.md
 ```
 
 不得回滚或修改业务代码、数据库、模型权重、训练脚本或测试资源。
+
+---
+
+## 10. Local Integration Result Update — 2026-05-15
+
+### 10.1 Latest Local Integration Evidence
+
+User-provided local integration results for Phase 2B Batch1:
+
+| Area | Result | Notes |
+|---|---|---|
+| Backend `/api/health` | PASS | Backend service health endpoint is reachable and healthy. |
+| Login `admin/admin123` | PASS | JWT login flow works with the frozen default account. |
+| `/api/auth/me` | PASS | JWT-authenticated current-user lookup works. |
+| `/api/models/published` | PASS | Model list endpoint is reachable. |
+| Records manual create/list/detail | PASS | Manual detection record API flow works. |
+| Frontend login | PASS | Frontend can complete login against backend. |
+| Frontend image detection page open | PASS | Image detection page is reachable. |
+| Image upload detection | BLOCKED but correctly diagnosed | Error: `ultralytics dependency is unavailable; real YOLO inference was not executed`. |
+
+### 10.2 Updated Gate Conclusion
+
+```text
+Phase 2B Batch1 Local Integration: PARTIAL PASS
+Full PASS: NOT GRANTED
+Primary blocker: ultralytics dependency unavailable / .pt unavailable
+Batch2: NOT ALLOWED
+```
+
+### 10.3 PASS Scope
+
+The following Batch1 local integration lanes are now considered PASS based on the latest local result report:
+
+- Backend health.
+- JWT login with `admin/admin123`.
+- JWT `/api/auth/me`.
+- Published model list endpoint.
+- Manual detection records create/list/detail.
+- Frontend login.
+- Frontend image detection page accessibility.
+
+### 10.4 BLOCKED Scope
+
+The following lanes remain BLOCKED and must not be reported as successful:
+
+- Real YOLO image inference.
+- Successful `/api/detection/image` response.
+- Real `detection_result` generated from YOLO output.
+- Result image generation from model detections.
+- File URL validation for inference-generated original/result images.
+- Automatic detection record save from successful image detection.
+- Batch1 full PASS.
+
+Current blocker is more specific than the previous generic missing-model state:
+
+```text
+ultralytics dependency is unavailable; real YOLO inference was not executed
+```
+
+This still belongs to the same AI runtime readiness class as `.pt unavailable`: the detection success path cannot run until the inference dependency and usable weight are both available and verified.
+
+### 10.5 Next-step Decision
+
+Recommended next step: **fix AI runtime readiness first** before spending more time on additional records/frontend smoke.
+
+Reason:
+
+1. `health/auth/model/records/frontend-login/page-open` already reached PASS for Batch1 local integration.
+2. Additional records/frontend smoke can improve evidence depth, but will not unlock Full PASS.
+3. The only critical Batch1 success-path blocker is now inference readiness: `ultralytics` unavailable and `.pt` not verified.
+4. After installing/confirming `ultralytics` and verifying a readable `.pt`, rerun only the dependent smoke subset:
+   - image detection upload
+   - detection_result schema
+   - result image generation
+   - file URL access
+   - automatic record save
+   - frontend image detection display
+   - record detail from generated detection
+
+### 10.6 Updated Integration Gate Standard
+
+```text
+Current status: PARTIAL PASS
+Allowed: continue local integration on existing Batch1 scope
+Not allowed: Batch2, full-pass declaration, fake inference success
+Blocker removal condition:
+- ultralytics import works in backend runtime
+- expected .pt weight exists and is readable
+- /api/detection/image returns a real success response
+- generated result image and detection record can be retrieved
+```
+
+---
+
+## 11. Backend/AI Latest Runtime Smoke Watch - 2026-05-17
+
+### 11.1 Current Watch State
+
+```text
+Runtime smoke status: WAITING FOR BACKEND/AI LATEST EVIDENCE
+Current gate result: PARTIAL PASS
+Full PASS: NOT GRANTED
+Batch2: NOT ALLOWED
+Docs action: keep this report open and append evidence when Backend/AI provides the latest runtime smoke output.
+```
+
+This update records the current waiting state only. It does **not** upgrade any blocked item to PASS without command output, HTTP response evidence, runtime logs, or screenshots/artifacts from Backend/AI.
+
+### 11.2 Evidence Slots Required for FULL PASS Review
+
+| Required evidence | Current status | PASS condition | Evidence to paste/attach next |
+|---|---|---|---|
+| `ultralytics` runtime | WAITING | Backend runtime can import and execute `ultralytics` without dependency/import/runtime error. | Python import output, backend startup/runtime log, package/version note. |
+| YOLO `.pt` weight readiness | WAITING | Expected `.pt` exists, is readable by backend runtime, and is the intended Batch1/dev-approved weight. | Weight filename, resolved path, existence/read check, model load log. |
+| `/api/detection/image` | WAITING | Authenticated image upload returns success response from real inference path, not fake/mock success. | Request summary, HTTP status, sanitized JSON response. |
+| `result_image` generation | WAITING | Detection produces a retrievable result image artifact. | `result_image.url`/object key, file existence/access check, optional screenshot. |
+| Records auto save | WAITING | Successful detection automatically creates a record linked to the detection response. | `record_id`, list/detail query result, persisted `detection_result` snippet. |
+| FULL PASS decision | PENDING | All critical Batch1 lanes above have evidence and no known critical errors remain. | Leader gate conclusion with evidence references. |
+
+### 11.3 Current Gate Interpretation
+
+```text
+PARTIAL PASS remains valid for already evidenced lanes:
+- health
+- auth login / auth me
+- published model list
+- manual records API flow
+- frontend login and image detection page reachability
+
+Still not granted:
+- real YOLO inference PASS
+- detection/image success PASS
+- result image PASS
+- detection_result schema PASS from runtime output
+- records auto-save PASS from detection success
+- Batch1 FULL PASS
+```
+
+### 11.4 Update Protocol When Backend/AI Smoke Arrives
+
+When Backend/AI provides the latest runtime smoke, append a new subsection below this section with:
+
+1. Timestamp and source agent.
+2. Exact runtime result: `FULL PASS`, `PARTIAL PASS`, or `FAIL/BLOCKED`.
+3. `ultralytics` runtime evidence.
+4. `.pt` load/read evidence.
+5. `/api/detection/image` request/response summary.
+6. `result_image` evidence.
+7. records auto-save evidence.
+8. Remaining blockers, if any.
+
+Do not replace earlier PARTIAL PASS history; append the latest evidence so the Batch1 gate trail remains auditable.
+
+---
+
+## 12. Backend/AI/Frontend Runtime Smoke Evidence Update - 2026-05-17
+
+### 12.1 Latest Reported Evidence
+
+Source: Backend/AI/Frontend latest smoke result provided to Documentation Agent on 2026-05-17.
+
+| Evidence item | Result | Gate impact |
+|---|---:|---|
+| `ultralytics` runtime | PASS: `ultralytics=8.4.51` | Clears previous AI dependency blocker. |
+| YOLO weight file | PASS: `yolo26n.pt` exists and is readable | Clears previous `.pt` availability blocker. |
+| YOLO weight size | `5,544,453 bytes` | Recorded for reproducibility. |
+| YOLO weight SHA256 | `9b09cc8bf347f0fc8a5f7657480587f25db09b34bf33b0652110fb03a8ad4fef` | Recorded for identity/integrity check. |
+| `/api/models/published` | PASS: `weight_exists=true` | Published model endpoint now confirms runtime-visible weight. |
+| `/api/detection/image` | PASS: HTTP `200`, `code=0` | Clears image detection success-path blocker. |
+| Auto-generated detection record | PASS: `dr_6d855b7125c84813bc794e946411ac13` | Clears detection-triggered records auto-save blocker for at least one successful run. |
+| Low threshold detection record | PASS: `dr_227020535354488a99b3703c07b62449`, detection count `1` at threshold `0.10` | Confirms non-empty detection can be persisted and queried. |
+| Result image artifact | PASS: generated, size `131182 bytes` | Clears result image generation blocker. |
+| `detection_result.schema_version` | PASS: `detection_result.v1` | Confirms current runtime output uses the frozen Batch1 schema version. |
+| Backend/AI pytest | PASS: `4 passed, 25 warnings` | Test suite passes; warnings remain non-blocking unless later classified otherwise. |
+| Frontend build | PASS | Frontend build gate passes. |
+| Frontend display compatibility | PASS: completed | Frontend can handle/display the Batch1 detection result shape. |
+
+### 12.2 Updated Blocker Review
+
+Previously blocking items from Sections 10-11 are now reclassified based on the latest evidence:
+
+| Former blocker | Previous status | Latest status | Notes |
+|---|---|---|---|
+| `ultralytics` unavailable | BLOCKED | CLEARED | Runtime reports `ultralytics=8.4.51`. |
+| `.pt` unavailable / unreadable | BLOCKED | CLEARED | `yolo26n.pt` exists, readable, size and SHA256 recorded. |
+| `/api/detection/image` success path | BLOCKED | CLEARED | Endpoint returned HTTP `200`, `code=0`. |
+| result image generation | BLOCKED | CLEARED | Result image generated, `131182 bytes`. |
+| automatic record save | BLOCKED | CLEARED | Auto-generated record `dr_6d855b7125c84813bc794e946411ac13`. |
+| non-empty detection persistence | WAITING | CLEARED | Low-threshold record `dr_227020535354488a99b3703c07b62449` has detection count `1`. |
+| schema version verification | WAITING | CLEARED | `detection_result.schema_version = detection_result.v1`. |
+| Frontend build/display | WAITING | CLEARED | Build passes and display compatibility is complete. |
+
+### 12.3 Updated Gate Decision
+
+```text
+Phase 2B Batch1 Gate: FULL PASS CANDIDATE
+Previous status: PARTIAL PASS
+Upgrade basis:
+- AI runtime dependency is available: ultralytics=8.4.51
+- Batch1 YOLO weight is present, readable, and hash-recorded: yolo26n.pt
+- Published model reports weight_exists=true
+- /api/detection/image returns HTTP 200 code=0
+- result image is generated
+- detection_result uses schema_version detection_result.v1
+- successful detection auto-saves records
+- low-threshold runtime smoke confirms persisted detection count=1
+- Backend/AI pytest passes: 4 passed, 25 warnings
+- Frontend build passes and display compatibility is complete
+
+Batch2: NOT ENTERED / NOT ALLOWED BY THIS REPORT
+Business code changes by Documentation Agent: NONE
+```
+
+### 12.4 FULL PASS Candidate Scope
+
+The report can be upgraded from `PARTIAL PASS` to **`FULL PASS CANDIDATE`** because all previously identified critical Batch1 success-path blockers now have positive evidence:
+
+- runtime inference dependency is available;
+- model weight exists and is readable;
+- model publication API confirms weight presence;
+- image detection endpoint returns success;
+- result image is produced;
+- detection output uses the expected schema version;
+- detection-triggered record auto-save works;
+- at least one low-threshold run persisted a non-empty detection;
+- backend/AI tests pass;
+- frontend build and display compatibility pass.
+
+This is intentionally recorded as **FULL PASS CANDIDATE**, not unconditional Batch2 approval. Final promotion to absolute `FULL PASS` remains a leader/release gate action if the project requires independent artifact review, screenshots, or exact command/log attachment.
+
+### 12.5 Remaining Notes / Non-blocking Risks
+
+| Item | Status | Handling |
+|---|---|---|
+| `pytest` warnings | Non-blocking: `25 warnings` | Track if warnings indicate deprecations or runtime instability; not a Batch1 blocker based on current evidence. |
+| Evidence provenance | User-provided latest smoke summary | Keep append-only trail; attach raw logs later if available. |
+| Batch2 | Not started | This report explicitly does not authorize or enter Batch2. |
+
+### 12.6 Rollback / Scope Control
+
+This update only changes the documentation report:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH1_SMOKE_TEST_REPORT.md
+```
+
+No frontend, backend, AI runtime, database, model weight, or test asset files were modified by Documentation Agent in this update.
