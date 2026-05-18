@@ -11,3 +11,5 @@ build/
 *.onnx
 uploads/
 results/
+runtime/
+logs/
