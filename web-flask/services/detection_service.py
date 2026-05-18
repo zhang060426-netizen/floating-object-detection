@@ -62,7 +62,14 @@ def detect_image(db, user, image_file, model_id, confidence_threshold=0.5, save_
     model = get_model(db, model_id)
     if not model:
         raise ValueError("model not found or unpublished")
-    upload_bucket, upload_key, upload_path = save_upload(image_file, "uploads", "images")
+    try:
+        upload_bucket, upload_key, upload_path = save_upload(image_file, "uploads", "images")
+    except ValueError as exc:
+        raise InferenceUnavailable(
+            str(exc),
+            reason="unsupported_image_type",
+            details={"filename": image_file.filename or "upload"},
+        ) from exc
     try:
         image_info = image_metadata(upload_path, image_file.filename or upload_path.name)
     except ValueError as exc:

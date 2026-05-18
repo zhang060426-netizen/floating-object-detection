@@ -19,6 +19,18 @@ def parse_bool(value, default=True):
     return str(value).lower() not in {"0", "false", "no", "off"}
 
 
+def parse_confidence(value, default=0.5):
+    if value is None:
+        return default
+    try:
+        confidence = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("confidence_threshold must be a number") from exc
+    if confidence < 0 or confidence > 1:
+        raise ValueError("confidence_threshold must be between 0 and 1")
+    return confidence
+
+
 @bp.route("/detection/image", methods=["POST"])
 @require_auth
 def image_detection():
@@ -29,14 +41,14 @@ def image_detection():
     if not model_id:
         return error_response("model_id is required", code=400)
     try:
-        confidence = float(request.form.get("confidence_threshold", 0.5))
+        confidence = parse_confidence(request.form.get("confidence_threshold"), 0.5)
     except ValueError:
-        return error_response("confidence_threshold must be a number", code=400)
+        return error_response("confidence_threshold must be between 0 and 1", code=400, data={"reason": "bad_request", "field": "confidence_threshold"})
     save_flag = parse_bool(request.form.get("save_record"), True)
     try:
         return success_response(detect_image(get_db(), g.current_user, image, model_id, confidence, save_flag))
     except InferenceUnavailable as exc:
-        http_status = 400 if exc.reason == "invalid_image" else 500
+        http_status = 400 if exc.reason in {"invalid_image", "unsupported_image_type"} else 500
         return error_response(
             str(exc),
             code=http_status,
@@ -55,7 +67,10 @@ def create_record():
     original = payload.get("original_image") or {}
     result = payload.get("result_image") or None
     detection_result = payload.get("detection_result") or {}
-    confidence = float(payload.get("confidence_threshold", 0.5))
+    try:
+        confidence = parse_confidence(payload.get("confidence_threshold"), 0.5)
+    except ValueError as exc:
+        return error_response(str(exc), code=400, data={"reason": "bad_request", "field": "confidence_threshold"}, http_status=400)
     if not model_id or not get_model(get_db(), model_id):
         return error_response("model not found or unpublished", code=400)
     if not original.get("bucket") or not original.get("object_key"):

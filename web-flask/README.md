@@ -29,6 +29,11 @@ Environment variables:
 
 ## Runtime diagnostics
 
+Health checks:
+
+- `GET /api/health` returns the minimal service liveness payload.
+- `GET /api/health/db` verifies the SQLite connection with `SELECT 1`.
+
 `GET /api/models/published` keeps the original model fields and adds `runtime_diagnostic` for Phase 2B Batch2 Stage1 readiness checks:
 
 - `ultralytics_import_status` / `ultralytics_importable` / `ultralytics_version` / `ultralytics_error`
@@ -46,6 +51,9 @@ The top-level `weight_exists` and `is_dev_placeholder` fields remain available f
 - `dependency_unavailable` when `ultralytics` cannot be loaded.
 - `weight_missing` when the selected model weight path is not readable.
 - `invalid_image` when the uploaded file cannot be opened as an image.
+- `unsupported_image_type` when the uploaded filename extension is outside `.jpg`, `.jpeg`, `.png`, `.webp`.
+
+`confidence_threshold` must be numeric and between `0` and `1` for both image detection and manual record creation.
 
 Successful requests return `detection_status` as either `detected` or `no_detection`. The same status is also present at `detection_result.summary.detection_status`; both outcomes may still save a detection record when `save_record=true`.
 
