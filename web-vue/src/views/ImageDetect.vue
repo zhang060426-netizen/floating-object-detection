@@ -3,7 +3,7 @@
     <el-page-header title="图片检测" content="上传单张图片并展示检测结果" @back="$router.push('/records/detection')" />
 
     <el-alert
-      title="Phase 2B Batch2 Stage1：仅补强图片检测与记录展示。视频、实时、Word、大屏仍未开放。"
+      title="Phase 2B Batch2 Stage2：仅稳定图片检测最小闭环、错误分支与 smoke 复现；视频、实时、Word、大屏仍未开放。"
       type="info"
       show-icon
       :closable="false"
@@ -28,11 +28,13 @@
               <el-select v-model="modelId" filterable placeholder="请选择已发布模型" :loading="modelsLoading" style="width: 100%">
                 <el-option v-for="model in models" :key="model.id" :label="model.name" :value="model.id">
                   <span>{{ model.name }}</span>
-                  <span class="muted option-meta">{{ model.base_model }}</span>
+                  <span class="muted option-meta">{{ model.base_model || model.id }}</span>
                 </el-option>
               </el-select>
               <div v-if="selectedModel" class="form-tip muted">
-                当前模型：{{ selectedModel.name }} <span v-if="selectedModel.base_model">({{ selectedModel.base_model }})</span>
+                当前模型：{{ selectedModel.name }}
+                <span v-if="selectedModel.base_model">({{ selectedModel.base_model }})</span>
+                <el-tag v-if="selectedModel.is_dev_placeholder" size="small" type="warning" class="model-tag">dev placeholder</el-tag>
               </div>
               <div v-if="modelError" class="form-tip error">{{ modelError }}</div>
             </el-form-item>
@@ -64,6 +66,7 @@ import { detectImage } from '../api/detection'
 import { fetchPublishedModels } from '../api/model'
 import type { ImageDetectionResponse } from '../types/detection'
 import type { PublishedModel } from '../types/model'
+import { detectionCount, detectionStatus } from '../utils/detectionDisplay'
 
 const models = ref<PublishedModel[]>([])
 const modelId = ref('')
@@ -110,7 +113,9 @@ async function startDetect() {
       confidenceThreshold: confidenceThreshold.value,
       saveRecord: true,
     })
-    ElMessage.success(`图片检测完成，目标数量：${result.value.detection_result?.summary?.total_detections ?? result.value.detection_result?.detections?.length ?? 0}`)
+    const status = detectionStatus(result.value.detection_result, result.value)
+    const count = detectionCount(result.value.detection_result)
+    ElMessage.success(`图片检测完成：${status}，目标数量：${count}`)
   } catch (error) {
     detectError.value = error instanceof Error ? error.message : '图片检测失败'
     ElMessage.error(detectError.value)
@@ -134,6 +139,10 @@ async function startDetect() {
 .form-tip {
   margin-top: 6px;
   font-size: 12px;
+}
+
+.model-tag {
+  margin-left: 8px;
 }
 
 .error {

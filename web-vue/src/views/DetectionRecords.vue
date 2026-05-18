@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <el-card class="page-card">
     <template #header>
       <div class="header-row">
@@ -18,18 +18,20 @@
       <el-table-column label="时间" min-width="170">
         <template #default="{ row }">{{ recordTime(row) }}</template>
       </el-table-column>
-      <el-table-column label="文件名" min-width="180">
+      <el-table-column label="文件" min-width="180">
         <template #default="{ row }">{{ row.filename || row.detection_result?.image?.filename || row.title || '-' }}</template>
       </el-table-column>
       <el-table-column label="模型" min-width="180">
-        <template #default="{ row }">{{ row.model_name || row.model?.name || row.detection_result?.model?.model_name || '-' }}</template>
+        <template #default="{ row }">{{ modelDisplayName(row, row.detection_result) }}</template>
       </el-table-column>
-      <el-table-column label="目标数" width="90">
-        <template #default="{ row }">{{ targetCount(row) }}</template>
+      <el-table-column label="目标" width="90">
+        <template #default="{ row }">{{ detectionCount(row.detection_result, row) }}</template>
       </el-table-column>
-      <el-table-column label="状态" width="120">
+      <el-table-column label="状态" width="130">
         <template #default="{ row }">
-          <el-tag :type="row.status === 'failed' ? 'danger' : 'success'">{{ row.status || 'completed' }}</el-tag>
+          <el-tag :type="row.status === 'failed' ? 'danger' : detectionStatus(row.detection_result) === 'detected' ? 'success' : 'info'">
+            {{ row.status || detectionStatus(row.detection_result) }}
+          </el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="120" fixed="right">
@@ -45,7 +47,8 @@
 import { onMounted, ref } from 'vue'
 import { fetchDetectionRecords } from '../api/detection'
 import type { DetectionRecord, PageResult } from '../types/detection'
-import { recordTime, targetCount } from '../utils/format'
+import { recordTime } from '../utils/format'
+import { detectionCount, detectionStatus, modelDisplayName } from '../utils/detectionDisplay'
 
 const loading = ref(false)
 const error = ref('')

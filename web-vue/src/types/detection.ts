@@ -45,6 +45,8 @@ export interface DetectionArtifacts {
   [key: string]: unknown
 }
 
+export type DetectionStatus = 'detected' | 'no_detection' | 'failed' | string
+
 export interface DetectionResult {
   schema_version?: string
   source_type?: string
@@ -62,11 +64,16 @@ export interface DetectionResult {
   detections: DetectionObject[]
   summary?: {
     total_detections?: number
+    object_count?: number
     has_detections?: boolean
+    has_detection?: boolean
+    detection_status?: DetectionStatus
     max_confidence?: number | null
     avg_confidence?: number | null
+    mean_confidence?: number | null
     confidence_threshold?: number
     by_class?: Record<string, number>
+    class_counts?: Record<string, number>
   }
   artifacts?: DetectionArtifacts
   timing?: {
@@ -78,6 +85,7 @@ export interface DetectionResult {
 
 export interface ImageDetectionResponse {
   record_id?: string
+  detection_status?: DetectionStatus
   original_image?: FileRef | string
   result_image?: FileRef | string
   result_image_url?: string
@@ -96,6 +104,7 @@ export interface DetectionRecord {
   updated_at?: string
   original_image?: FileRef | string
   result_image?: FileRef | string
+  result_image_url?: string
   detection_result?: DetectionResult
   target_count?: number
   confidence_threshold?: number

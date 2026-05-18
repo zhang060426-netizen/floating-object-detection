@@ -5,6 +5,16 @@ import type { ApiEnvelope } from '../types/api'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 
+const REASON_LABELS: Record<string, string> = {
+  bad_request: '请求参数或上传文件不符合要求',
+  invalid_image: '上传文件不是可识别图片',
+  unsupported_image_type: '不支持的图片类型',
+  dependency_unavailable: '后端推理依赖不可用',
+  weight_missing: '模型权重不可读或不存在',
+  model_not_found: '模型不存在或未发布',
+  unauthorized: '登录状态无效',
+}
+
 export class ApiClientError extends Error {
   code?: number
   status?: number
@@ -32,7 +42,7 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
   try {
     response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers })
   } catch {
-    throw new ApiClientError('无法连接后端 Flask API，请确认服务已启动。')
+    throw new ApiClientError('无法连接后端 Flask API，请确认 smoke 服务已启动。')
   }
 
   const text = await response.text()
@@ -88,7 +98,8 @@ function readableError(value: unknown, fallback: string): string {
   const reason = firstString(record.reason, error?.reason, data?.reason)
   const field = firstString(error?.field, data?.field)
   const parts = [direct || fallback]
-  if (reason && reason !== parts[0]) parts.push(`原因：${reason}`)
+  const reasonText = reason ? (REASON_LABELS[reason] ? `${REASON_LABELS[reason]} (${reason})` : reason) : ''
+  if (reasonText && reasonText !== parts[0]) parts.push(`原因：${reasonText}`)
   if (field) parts.push(`字段：${field}`)
   return parts.join('；')
 }

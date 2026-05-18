@@ -13,7 +13,7 @@ export function resolveFileUrl(ref?: FileRef | string | null): string {
 }
 
 export function fileRefError(ref?: FileRef | string | null): string {
-  if (!ref) return '未返回文件 URL。'
+  if (!ref) return '后端未返回文件 URL。'
   if (typeof ref === 'string') return ''
   if (ref.url || (ref.bucket && ref.object_key)) return ''
   return '文件引用缺少 url，或缺少 bucket/object_key。'

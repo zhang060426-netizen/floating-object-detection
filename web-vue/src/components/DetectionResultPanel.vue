@@ -3,15 +3,18 @@
     <template #header>
       <div class="panel-header">
         <strong>检测结果</strong>
-        <el-tag v-if="result?.record_id" type="success">记录 {{ result.record_id }}</el-tag>
+        <div class="panel-tags">
+          <el-tag :type="statusTagType">{{ statusText }}</el-tag>
+          <el-tag v-if="result?.record_id" type="success">记录 {{ result.record_id }}</el-tag>
+        </div>
       </div>
     </template>
 
     <el-empty v-if="!result" description="请上传图片并开始检测，结果将在此处展示" />
     <template v-else>
       <el-alert
-        v-if="isDevPlaceholder"
-        title="当前为开发占位结果：后端未执行真实推理或返回了 placeholder 标记。"
+        v-if="isDevPlaceholderResult"
+        title="当前为开发占位模型或占位结果：仅用于 Stage2 smoke，不代表生产精度。"
         type="warning"
         show-icon
         :closable="false"
@@ -19,8 +22,8 @@
       />
 
       <el-alert
-        v-if="backendReason"
-        :title="`后端提示：${backendReason}`"
+        v-if="reasonText"
+        :title="`后端提示：${reasonText}`"
         type="warning"
         show-icon
         :closable="false"
@@ -30,20 +33,21 @@
       <el-row :gutter="18">
         <el-col :xs="24" :md="12">
           <h4>结果图</h4>
-          <AuthImage :source="resultImageRef" label="结果图" image-class="result-image" />
+          <AuthImage :source="imageRef" label="结果图" image-class="result-image" />
         </el-col>
         <el-col :xs="24" :md="12">
           <el-descriptions :column="1" border>
-            <el-descriptions-item label="模型">{{ modelName }}</el-descriptions-item>
-            <el-descriptions-item label="检测数量">{{ detectionCount }}</el-descriptions-item>
+            <el-descriptions-item label="模型">{{ displayModelName }}</el-descriptions-item>
+            <el-descriptions-item label="检测状态">{{ statusText }}</el-descriptions-item>
+            <el-descriptions-item label="检测数量">{{ count }}</el-descriptions-item>
             <el-descriptions-item label="最高置信度">{{ percent(detectionResult.summary?.max_confidence) }}</el-descriptions-item>
-            <el-descriptions-item label="平均置信度">{{ percent(detectionResult.summary?.avg_confidence) }}</el-descriptions-item>
-            <el-descriptions-item label="置信度阈值">{{ percent(detectionResult.summary?.confidence_threshold ?? detectionResult.model?.confidence_threshold) }}</el-descriptions-item>
+            <el-descriptions-item label="平均置信度">{{ percent(detectionResult.summary?.avg_confidence ?? detectionResult.summary?.mean_confidence) }}</el-descriptions-item>
+            <el-descriptions-item label="置信度阈值">{{ percent(threshold) }}</el-descriptions-item>
             <el-descriptions-item label="推理耗时">{{ inferenceMs }}</el-descriptions-item>
           </el-descriptions>
 
           <el-alert
-            v-if="detectionCount === 0"
+            v-if="count === 0"
             class="result-alert"
             title="未检测到目标"
             description="后端返回成功，但 detections 为空。可调整阈值或更换图片后重试。"
@@ -75,45 +79,38 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AuthImage from './AuthImage.vue'
-import type { DetectionArtifacts, FileRef, ImageDetectionResponse } from '../types/detection'
+import type { ImageDetectionResponse } from '../types/detection'
 import { bboxText, percent } from '../utils/format'
+import { backendReason, confidenceThreshold, detectionCount, detectionStatus, isDevPlaceholder, modelDisplayName, resultImageRef } from '../utils/detectionDisplay'
 
 const props = defineProps<{ result?: ImageDetectionResponse | null }>()
 
 const detectionResult = computed(() => props.result?.detection_result ?? { detections: [] })
 const detections = computed(() => detectionResult.value.detections ?? [])
-const detectionCount = computed(() => detectionResult.value.summary?.total_detections ?? detections.value.length)
-const artifacts = computed(() => detectionResult.value.artifacts)
-const resultImageRef = computed(() =>
-  props.result?.result_image ||
-  props.result?.result_image_url ||
-  artifacts.value?.result_image ||
-  artifacts.value?.result_image_url ||
-  artifactKeyRef(artifacts.value, 'result_image_key') ||
-  artifactKeyRef(artifacts.value, 'annotated_image_key'),
-)
-const modelName = computed(() => detectionResult.value.model?.model_name || detectionResult.value.model?.model_id || '-')
+const count = computed(() => detectionCount(detectionResult.value))
+const imageRef = computed(() => resultImageRef(props.result, null, detectionResult.value))
+const displayModelName = computed(() => modelDisplayName(null, detectionResult.value))
+const threshold = computed(() => confidenceThreshold(null, detectionResult.value))
+const status = computed(() => detectionStatus(detectionResult.value, props.result))
+const statusText = computed(() => (status.value === 'detected' ? 'detected' : status.value === 'no_detection' ? 'no_detection' : status.value))
+const statusTagType = computed(() => (status.value === 'detected' ? 'success' : status.value === 'no_detection' ? 'info' : 'warning'))
 const inferenceMs = computed(() => {
   const value = detectionResult.value.timing?.inference_ms ?? detectionResult.value.timing_ms?.inference_ms
   return value === undefined ? '-' : `${value} ms`
 })
-const isDevPlaceholder = computed(() => Boolean(artifacts.value?.dev_placeholder || artifacts.value?.placeholder))
-const backendReason = computed(() => stringValue(artifacts.value?.reason) || stringValue(detectionResult.value.raw?.reason))
-
-function artifactKeyRef(artifact: DetectionArtifacts | undefined, key: 'result_image_key' | 'annotated_image_key'): FileRef | null {
-  const value = artifact?.[key]
-  return typeof value === 'string' && value ? { bucket: 'results', object_key: value } : null
-}
-
-function stringValue(value: unknown): string {
-  return typeof value === 'string' ? value : ''
-}
+const isDevPlaceholderResult = computed(() => isDevPlaceholder(detectionResult.value))
+const reasonText = computed(() => backendReason(detectionResult.value, detectionResult.value.artifacts))
 </script>
 
 <style scoped>
-.panel-header {
+.panel-header,
+.panel-tags {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.panel-header {
   justify-content: space-between;
 }
 

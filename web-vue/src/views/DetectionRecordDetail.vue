@@ -11,19 +11,29 @@
             <el-descriptions :column="1" border>
               <el-descriptions-item label="记录 ID">{{ record.id }}</el-descriptions-item>
               <el-descriptions-item label="创建时间">{{ recordTime(record) }}</el-descriptions-item>
-              <el-descriptions-item label="模型">{{ modelName }}</el-descriptions-item>
-              <el-descriptions-item label="置信度阈值">{{ percent(confidenceThreshold) }}</el-descriptions-item>
-              <el-descriptions-item label="目标数量">{{ detectionCount }}</el-descriptions-item>
+              <el-descriptions-item label="模型">{{ displayModelName }}</el-descriptions-item>
+              <el-descriptions-item label="检测状态">{{ status }}</el-descriptions-item>
+              <el-descriptions-item label="置信度阈值">{{ percent(threshold) }}</el-descriptions-item>
+              <el-descriptions-item label="目标数量">{{ count }}</el-descriptions-item>
               <el-descriptions-item label="最高置信度">{{ percent(detectionResult?.summary?.max_confidence) }}</el-descriptions-item>
-              <el-descriptions-item label="平均置信度">{{ percent(detectionResult?.summary?.avg_confidence) }}</el-descriptions-item>
+              <el-descriptions-item label="平均置信度">{{ percent(detectionResult?.summary?.avg_confidence ?? detectionResult?.summary?.mean_confidence) }}</el-descriptions-item>
               <el-descriptions-item label="推理耗时">{{ inferenceMs }}</el-descriptions-item>
             </el-descriptions>
 
+            <el-alert
+              v-if="reasonText"
+              :title="`后端提示：${reasonText}`"
+              type="warning"
+              show-icon
+              :closable="false"
+              class="detail-section"
+            />
+
             <h4>原图</h4>
-            <AuthImage :source="originalImageRef" label="原图" image-class="detail-image" />
+            <AuthImage :source="originalRef" label="原图" image-class="detail-image" />
 
             <h4>结果图</h4>
-            <AuthImage :source="resultImageRef" label="结果图" image-class="detail-image" />
+            <AuthImage :source="resultRef" label="结果图" image-class="detail-image" />
           </el-card>
         </el-col>
         <el-col :xs="24" :lg="12">
@@ -71,8 +81,9 @@
 import { computed, onMounted, ref } from 'vue'
 import AuthImage from '../components/AuthImage.vue'
 import { fetchDetectionRecord } from '../api/detection'
-import type { DetectionArtifacts, DetectionRecord, FileRef } from '../types/detection'
-import { bboxText, percent, recordTime, targetCount } from '../utils/format'
+import type { DetectionRecord } from '../types/detection'
+import { bboxText, percent, recordTime } from '../utils/format'
+import { backendReason, confidenceThreshold, detectionCount, detectionStatus, modelDisplayName, originalImageRef, resultImageRef } from '../utils/detectionDisplay'
 
 const props = defineProps<{ id: string }>()
 const loading = ref(false)
@@ -80,23 +91,14 @@ const error = ref('')
 const record = ref<DetectionRecord | null>(null)
 
 const detectionResult = computed(() => record.value?.detection_result)
-const artifacts = computed(() => detectionResult.value?.artifacts)
-const originalImageRef = computed(() =>
-  record.value?.original_image ||
-  artifacts.value?.original_image ||
-  artifactKeyRef(artifacts.value, 'original_image_key', 'uploads'),
-)
-const resultImageRef = computed(() =>
-  record.value?.result_image ||
-  artifacts.value?.result_image ||
-  artifacts.value?.result_image_url ||
-  artifactKeyRef(artifacts.value, 'result_image_key', 'results') ||
-  artifactKeyRef(artifacts.value, 'annotated_image_key', 'results'),
-)
 const detections = computed(() => detectionResult.value?.detections ?? [])
-const detectionCount = computed(() => (record.value ? targetCount(record.value) : 0))
-const modelName = computed(() => record.value?.model_name || record.value?.model?.name || detectionResult.value?.model?.model_name || detectionResult.value?.model?.model_id || '-')
-const confidenceThreshold = computed(() => record.value?.confidence_threshold ?? detectionResult.value?.summary?.confidence_threshold ?? detectionResult.value?.model?.confidence_threshold)
+const count = computed(() => detectionCount(detectionResult.value, record.value))
+const displayModelName = computed(() => modelDisplayName(record.value, detectionResult.value))
+const threshold = computed(() => confidenceThreshold(record.value, detectionResult.value))
+const status = computed(() => detectionStatus(detectionResult.value))
+const originalRef = computed(() => originalImageRef(record.value, detectionResult.value))
+const resultRef = computed(() => resultImageRef(null, record.value, detectionResult.value))
+const reasonText = computed(() => backendReason(detectionResult.value, detectionResult.value?.artifacts))
 const inferenceMs = computed(() => {
   const value = detectionResult.value?.timing?.inference_ms ?? detectionResult.value?.timing_ms?.inference_ms
   return value === undefined ? '-' : `${value} ms`
@@ -115,11 +117,6 @@ async function loadRecord() {
     loading.value = false
   }
 }
-
-function artifactKeyRef(artifact: DetectionArtifacts | undefined, key: string, bucket: string): FileRef | null {
-  const value = artifact?.[key]
-  return typeof value === 'string' && value ? { bucket, object_key: value } : null
-}
 </script>
 
 <style scoped>
@@ -129,7 +126,7 @@ function artifactKeyRef(artifact: DetectionArtifacts | undefined, key: string, b
 }
 
 .detail-section {
-  margin-bottom: 14px;
+  margin: 14px 0;
 }
 
 .detail-image {
