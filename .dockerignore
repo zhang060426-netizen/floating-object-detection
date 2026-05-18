@@ -1,0 +1,17 @@
+﻿# Frontend Docker build context excludes local/generated artifacts.
+.git
+.omx
+.ccpanes
+agent_outputs
+**/node_modules
+**/dist
+**/.vite
+**/.env
+**/.env.*.local
+**/__pycache__
+**/*.pyc
+**/*.pt
+**/*.pth
+**/*.onnx
+uploads
+results

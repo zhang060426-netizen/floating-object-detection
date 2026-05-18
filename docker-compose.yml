@@ -1,0 +1,19 @@
+﻿services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_BASE_URL: /api
+    image: floating-objects-frontend:phase2b-batch3
+    environment:
+      BACKEND_UPSTREAM: http://backend:5000
+    ports:
+      - "8080:80"
+    networks:
+      - floating-net
+    restart: unless-stopped
+
+networks:
+  floating-net:
+    name: floating-net

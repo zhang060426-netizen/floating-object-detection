@@ -22,7 +22,10 @@ export function fileRefError(ref?: FileRef | string | null): string {
 function withBase(url: string): string {
   if (!url) return ''
   if (/^https?:\/\//i.test(url) || url.startsWith('blob:') || url.startsWith('data:')) return url
-  return `${API_BASE_URL}${url.startsWith('/') ? url : `/${url}`}`
+  const normalizedUrl = url.startsWith('/') ? url : `/${url}`
+  if (!API_BASE_URL) return normalizedUrl
+  if (normalizedUrl === API_BASE_URL || normalizedUrl.startsWith(`${API_BASE_URL}/`)) return normalizedUrl
+  return `${API_BASE_URL}${normalizedUrl}`
 }
 
 function encodePath(path: string): string {
