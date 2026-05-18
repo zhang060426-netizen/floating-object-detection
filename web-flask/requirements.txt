@@ -1,0 +1,6 @@
+﻿Flask>=2.2
+PyJWT>=2.0
+Pillow>=9.0
+pytest>=7.0
+# Optional for real inference; absence returns a diagnostic error, not fake success.
+ultralytics>=8.0
