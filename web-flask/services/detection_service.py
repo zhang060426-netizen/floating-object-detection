@@ -1,7 +1,7 @@
 ﻿import json
 import uuid
 
-from ai.yolo_infer import build_detection_result, draw_result_image, image_metadata, run_yolo_image
+from ai.yolo_infer import InferenceUnavailable, build_detection_result, draw_result_image, image_metadata, run_yolo_image
 from services.file_storage_service import copy_result_image, file_info, resolve_object_path, save_upload
 from services.model_service import get_model
 
@@ -63,7 +63,14 @@ def detect_image(db, user, image_file, model_id, confidence_threshold=0.5, save_
     if not model:
         raise ValueError("model not found or unpublished")
     upload_bucket, upload_key, upload_path = save_upload(image_file, "uploads", "images")
-    image_info = image_metadata(upload_path, image_file.filename or upload_path.name)
+    try:
+        image_info = image_metadata(upload_path, image_file.filename or upload_path.name)
+    except ValueError as exc:
+        raise InferenceUnavailable(
+            "invalid image file",
+            reason="invalid_image",
+            details={"filename": image_file.filename or upload_path.name},
+        ) from exc
 
     detections, inference_ms = run_yolo_image(upload_path, model, confidence_threshold)
     result_bucket, result_key, result_path = copy_result_image(upload_path, image_file.filename or upload_path.name)
@@ -87,8 +94,10 @@ def detect_image(db, user, image_file, model_id, confidence_threshold=0.5, save_
     record_id = None
     if save_record_flag:
         record_id = save_record(db, user["id"], model_id, original_info, result_info, detection_result, confidence_threshold)
+    detection_status = detection_result["summary"]["detection_status"]
     return {
         "record_id": record_id,
+        "detection_status": detection_status,
         "original_image": original_info,
         "result_image": result_info,
         "detection_result": detection_result,

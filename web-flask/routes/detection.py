@@ -36,14 +36,15 @@ def image_detection():
     try:
         return success_response(detect_image(get_db(), g.current_user, image, model_id, confidence, save_flag))
     except InferenceUnavailable as exc:
+        http_status = 400 if exc.reason == "invalid_image" else 500
         return error_response(
             str(exc),
-            code=500,
-            data={"reason": "inference_unavailable", "model_id": model_id},
-            http_status=500,
+            code=http_status,
+            data={"reason": exc.reason, "model_id": model_id, **exc.details},
+            http_status=http_status,
         )
     except ValueError as exc:
-        return error_response(str(exc), code=400, http_status=400)
+        return error_response(str(exc), code=400, data={"reason": "bad_request", "model_id": model_id}, http_status=400)
 
 
 @bp.route("/detection/records", methods=["POST"])

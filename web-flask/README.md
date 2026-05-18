@@ -26,6 +26,29 @@ Environment variables:
 - `APP_UPLOAD_MAX_MB` (default `16`)
 - `AI_MODEL_ROOT` (optional, defaults to project AI weights directory when discoverable)
 
+
+## Runtime diagnostics
+
+`GET /api/models/published` keeps the original model fields and adds `runtime_diagnostic` for Phase 2B Batch2 Stage1 readiness checks:
+
+- `ultralytics_import_status` / `ultralytics_importable` / `ultralytics_version` / `ultralytics_error`
+- `active_weight_path`
+- `weight_exists`
+- `weight_sha256` (`null` when the weight is missing)
+- `is_dev_placeholder`
+
+The top-level `weight_exists` and `is_dev_placeholder` fields remain available for backward compatibility.
+
+## Image detection error contract
+
+`POST /api/detection/image` does not fake inference success. Runtime failures return structured `data.reason` values:
+
+- `dependency_unavailable` when `ultralytics` cannot be loaded.
+- `weight_missing` when the selected model weight path is not readable.
+- `invalid_image` when the uploaded file cannot be opened as an image.
+
+Successful requests return `detection_status` as either `detected` or `no_detection`. The same status is also present at `detection_result.summary.detection_status`; both outcomes may still save a detection record when `save_record=true`.
+
 ## Verification
 
 ```powershell

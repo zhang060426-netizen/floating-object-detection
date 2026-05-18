@@ -1,4 +1,7 @@
-﻿import time
+﻿import hashlib
+import importlib.metadata
+import importlib.util
+import time
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -7,7 +10,39 @@ CLASS_MAP = {0: "floating_object"}
 
 
 class InferenceUnavailable(RuntimeError):
-    pass
+    def __init__(self, message, reason="inference_unavailable", details=None):
+        super().__init__(message)
+        self.reason = reason
+        self.details = details or {}
+
+
+def ultralytics_status():
+    spec = importlib.util.find_spec("ultralytics")
+    imported = spec is not None
+    version = None
+    error = None
+    if imported:
+        try:
+            version = importlib.metadata.version("ultralytics")
+        except Exception as exc:
+            error = str(exc)
+    return {
+        "ultralytics_import_status": "available" if imported else "missing",
+        "ultralytics_importable": imported,
+        "ultralytics_version": version,
+        "ultralytics_error": error,
+    }
+
+
+def file_sha256(path):
+    target = Path(path) if path else None
+    if not target or not target.exists() or not target.is_file():
+        return None
+    digest = hashlib.sha256()
+    with target.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def image_metadata(image_path, filename):
@@ -24,9 +59,17 @@ def _load_yolo(weight_path):
     try:
         from ultralytics import YOLO
     except Exception as exc:
-        raise InferenceUnavailable("ultralytics dependency is unavailable; real YOLO inference was not executed") from exc
+        raise InferenceUnavailable(
+            "ultralytics dependency is unavailable; real YOLO inference was not executed",
+            reason="dependency_unavailable",
+            details={"dependency": "ultralytics"},
+        ) from exc
     if not Path(weight_path).exists():
-        raise InferenceUnavailable(f"model weight not found: {weight_path}")
+        raise InferenceUnavailable(
+            f"model weight not found: {weight_path}",
+            reason="weight_missing",
+            details={"weight_path": str(weight_path)},
+        )
     return YOLO(str(weight_path))
 
 
@@ -100,6 +143,7 @@ def build_detection_result(model_row, image_info, detections, artifacts, confide
             "object_count": total,
             "has_detections": total > 0,
             "has_detection": total > 0,
+            "detection_status": "detected" if total > 0 else "no_detection",
             "class_counts": {"floating_object": total} if total else {},
             "max_confidence": max(confidences) if confidences else None,
             "avg_confidence": sum(confidences) / len(confidences) if confidences else None,
