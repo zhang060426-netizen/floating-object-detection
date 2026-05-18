@@ -128,3 +128,93 @@ detection_result.v1 compatibility: PASS - preserved
 ## 7. Rollback / Recovery Note
 
 Docs/Test changed documentation artifacts only. If this gate summary must be reverted, revert the Stage1 docs artifacts independently; no business code, database file, model weight, frontend UI implementation, backend runtime implementation, or AI inference implementation was modified by Docs/Test.
+
+## 8. Stage2 Docs/Test Implementation Gate
+
+Status: ACTIVE - WAITING FOR EVIDENCE
+Date: 2026-05-18
+
+Stage2 Docs/Test implementation is evidence-control work only. It does not authorize Batch3 and does not authorize video, realtime, Word, dashboard, weight mutation, or `detection_result.v1` breaking changes.
+
+| Stage2 item | PASS condition | Current status | Evidence target |
+|---|---|---|---|
+| Stage2 docs task | Task record exists under `tasks/docs/` | PASS | `TASK_PHASE2B_BATCH2_STAGE2.md` |
+| Stage2 evidence template | Template exists under `agent_outputs/docs/` | PASS | `PHASE2B_BATCH2_STAGE2_SMOKE_EVIDENCE_TEMPLATE.md` |
+| Stage2 tracking report | Tracking report exists under `agent_outputs/docs/` | PASS | `PHASE2B_BATCH2_STAGE2_SMOKE_TRACKING_REPORT.md` |
+| Stage2 closeout criteria | Criteria exists under `agent_outputs/docs/` | PASS | `PHASE2B_BATCH2_STAGE2_CLOSEOUT_CRITERIA.md` |
+| Backend smoke evidence | Backend pytest/API evidence received and passing | WAITING | pytest, login, model, image detection, result image, record detail |
+| Frontend smoke evidence | Frontend build/display evidence received and passing | WAITING | build, login display, image detection display, record display/error display |
+| AI smoke/readiness evidence | AI dependency/weight/inference/schema evidence received and passing | WAITING | ultralytics, weight identity, inference, result image, `detection_result.v1` |
+| Scope guard | No forbidden scope entered | PASS - current Docs/Test scope | git status and explicit non-entry statement |
+
+### 8.1 Stage2 Current Decision
+
+```text
+Phase 2B Batch2 Stage2 Gate: WAITING FOR EVIDENCE
+Planning artifacts: PASS
+Stage2 Docs/Test artifacts: PASS
+Required runtime evidence slots: WAITING
+PASS: NOT YET
+FAIL: NO
+BLOCKED: NO
+Batch3: NOT ENTERED / NOT AUTHORIZED
+Business code modified by Docs/Test: NO
+Weights modified by Docs/Test: NO
+Video/realtime/Word/dashboard scope entered: NO
+Compatibility gate: detection_result.v1 MUST remain backward compatible
+```
+
+## 9. Stage2 Final Closeout Archive Gate
+
+Status: PASS WITH NON-BLOCKING EXCEPTIONS
+Date: 2026-05-18
+
+Stage2 final closeout archives the Backend, Frontend, and AI Stage2 smoke evidence. This gate does not authorize Batch3 and does not authorize video, realtime, Word, dashboard, weight mutation, class/category mutation, or `detection_result.v1` breaking changes.
+
+### 9.1 Submitted Commits
+
+| Area | Commit | Status |
+|---|---|---|
+| Backend | `58316f009e6ea16e9875a61440d706b0da314644` | PASS |
+| Frontend | `2072bbc3ed80ad7cb802cb13fb5a4d2636c8b19d` | PASS |
+| AI | `bfa680d` | PASS with non-blocking hash exception |
+
+### 9.2 Final Evidence Slots
+
+| Stage2 item | Final status | Evidence / note |
+|---|---|---|
+| Stage2 Smoke Gate | PASS WITH NON-BLOCKING EXCEPTIONS | Final closeout archived in `PHASE2B_BATCH2_STAGE2_FINAL_CLOSEOUT.md`. |
+| Backend API smoke | PASS | Backend commit `58316f009e6ea16e9875a61440d706b0da314644`. |
+| Backend pytest | PASS | `14 passed, 73 warnings`. |
+| Frontend main smoke | PASS | Frontend commit `2072bbc3ed80ad7cb802cb13fb5a4d2636c8b19d`. |
+| Frontend build | PASS | Build PASS. |
+| Frontend UI/API smoke | PASS WITH NON-BLOCKING EXCEPTIONS | Main smoke PASS; negative-path trigger gaps documented. |
+| AI unittest/scope readiness | PASS | AI commit `bfa680d`. |
+| AI readiness hash | BLOCKED / NON-BLOCKING | AI worktree lacked local `yolo26n.pt`, so SHA256 measurement was blocked. |
+| detection_result.v1 compatibility | PASS | Compatible / preserved; no breaking migration. |
+| Forbidden scope guard | PASS | Batch3/video/realtime/Word/dashboard not entered; weights/classes not modified. |
+
+### 9.3 Non-blocking Exceptions
+
+| Exception | Final handling |
+|---|---|
+| Frontend `dependency_unavailable` could not be triggered without breaking environment | NON-BLOCKING |
+| Frontend `weight_missing` could not be triggered without destructive/unsafe weight manipulation | NON-BLOCKING |
+| Frontend `model_not_found` coverage | PARTIAL / NON-BLOCKING |
+| AI worktree missing local `yolo26n.pt` for SHA256 smoke | BLOCKED sub-slot / NON-BLOCKING gate exception |
+
+### 9.4 Stage2 Final Decision
+
+```text
+Phase 2B Batch2 Stage2 Smoke Gate: PASS WITH NON-BLOCKING EXCEPTIONS
+Backend: PASS - pytest 14 passed, 73 warnings
+Frontend main smoke: PASS
+Frontend build: PASS
+AI scope/readiness: PASS
+AI hash smoke: BLOCKED in AI worktree due to missing local yolo26n.pt; non-blocking
+Batch3: NOT ENTERED / NOT AUTHORIZED
+Video/realtime/Word/dashboard: NOT ENTERED
+Weights modified: NO
+Model classes/categories modified: NO
+detection_result.v1 compatibility: PASS - preserved
+```

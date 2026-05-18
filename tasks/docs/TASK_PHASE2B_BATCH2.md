@@ -70,3 +70,42 @@ Required evidence slots now tracked:
 - records detail.
 
 Scope remains docs/test tracking only. No business code, weight, video, realtime, Word, dashboard, or large-screen work is authorized by this update.
+
+---
+
+## 6. Stage2 Docs/Test Implementation Update - 2026-05-18
+
+Status: Stage2 evidence-control artifacts created; waiting for Backend/Frontend/AI smoke evidence.
+
+Created Stage2 artifacts:
+- `tasks/docs/TASK_PHASE2B_BATCH2_STAGE2.md`
+- `agent_outputs/docs/PHASE2B_BATCH2_STAGE2_SMOKE_EVIDENCE_TEMPLATE.md`
+- `agent_outputs/docs/PHASE2B_BATCH2_STAGE2_SMOKE_TRACKING_REPORT.md`
+- `agent_outputs/docs/PHASE2B_BATCH2_STAGE2_CLOSEOUT_CRITERIA.md`
+
+Updated:
+- `agent_outputs/docs/PHASE2B_BATCH2_GATE_CHECKLIST.md`
+
+Stage2 evidence slots now tracked:
+- Backend pytest and API smoke;
+- Frontend build and display smoke;
+- AI dependency, weight readiness, inference compatibility, and schema smoke;
+- scope guard and `detection_result.v1` compatibility.
+
+Scope remains Docs/Test tracking only. No business code, runtime database, generated smoke image, model weight, video, realtime, Word, dashboard, large-screen, Batch3, or schema-breaking work is authorized by this update.
+
+---
+
+## 9. Stage2 Final Closeout Archive - 2026-05-18
+
+Status: Stage2 Smoke Gate archived as `PASS WITH NON-BLOCKING EXCEPTIONS`.
+
+Closeout artifact:
+- `agent_outputs/docs/PHASE2B_BATCH2_STAGE2_FINAL_CLOSEOUT.md`
+
+Gate/tracking updates:
+- `agent_outputs/docs/PHASE2B_BATCH2_GATE_CHECKLIST.md`
+- `agent_outputs/docs/PHASE2B_BATCH2_STAGE2_SMOKE_TRACKING_REPORT.md`
+- `tasks/docs/TASK_PHASE2B_BATCH2_STAGE2.md`
+
+Scope guard remains active: no Batch3, video, realtime, Word, dashboard, weight modification, class/category modification, or `detection_result.v1` breaking migration.
