@@ -2,17 +2,16 @@
 
 ## 范围
 
-本目录为 Phase 2B Batch1 前端最小可运行重建，仅实现：
+本前端仅覆盖 Phase 2B Batch1 最小可运行链路：
 
-- Vue3 + Vite + Element Plus + Pinia + Vue Router 工程入口
-- 登录页：提交账号密码，保存 JWT
-- 基础布局：图片检测、检测记录导航与退出
-- 图片检测页：选择已发布模型、上传单张图片、展示结果图与目标列表
-- 检测记录页：列表与详情、原图/结果图、目标列表、原始 JSON
+- Vue3 + Vite + Element Plus + Pinia + Vue Router 工程骨架
+- 登录、JWT 本地保存、路由鉴权守卫
+- 图片检测：选择已发布模型、上传单张图片、展示结果图与目标列表
+- 检测记录：列表、详情、原始 JSON 折叠展示
 
-暂不实现视频检测、实时检测、Word 报告、大屏美化、训练/数据集/评估完整 UI；对应入口会提示“Phase 2B 暂不开放”。
+暂不实现视频检测、实时检测、Word 报告、大屏可视化、训练/数据集/模型评估完整 UI；相关入口必须标注“Phase 2B 暂不开放”。
 
-## 启动与配置
+## 启动
 
 ```powershell
 cd E:/MM/floating-worktrees/frontend-worktree/web-vue
@@ -26,25 +25,25 @@ npm run dev
 npm run build
 ```
 
-环境变量：
+## 环境变量
 
-- `VITE_API_BASE_URL`：生产/直连 API 地址，默认空字符串，使用当前源下的 `/api`
-- `VITE_DEV_PROXY_TARGET`：Vite dev server `/api` 代理目标，默认 `http://localhost:5000`
+- `VITE_API_BASE_URL`：前端请求 API 的基础地址；为空时使用同源 `/api`。
+- `VITE_DEV_PROXY_TARGET`：Vite dev server `/api` 代理目标，默认 `http://localhost:5000`。
 
-## 对接的冻结接口
+## Batch1 对接接口
 
-- `POST /api/auth/login`
-- `GET /api/auth/me`
-- `GET /api/models/published`
-- `POST /api/detection/image`
+- `POST /api/user/login`
+- `GET /api/user/current`
+- `GET /api/detection/models/published`
+- `POST /api/detection/detect`
 - `GET /api/detection/records`
 - `GET /api/detection/records/:id`
-- 文件 URL 优先消费后端返回的 `url`；若仅有 `bucket/object_key`，按 `/api/files/:bucket/*object_key` 生成。
+- 文件访问：优先使用响应中的 `url`；若仅返回 `bucket/object_key`，前端生成 `/api/file/:bucket/*object_key`。
 
-统一响应兼容 `code === 0` 与 `code === 200`，消息字段兼容 `message` 与 `msg`。
+响应兼容 `{ code, msg/message, data }` 包装；`code === 0` 或 `code === 200` 视为成功。
 
 ## 已知限制
 
-- 真实联调依赖后端 Phase 2B 最小 API 可运行。
-- 默认登录表单按冻结契约填入 `admin / admin123`；如后端使用其他默认密码，以后端契约为准。
-- 无后端时页面应显示清晰错误，不应空白崩溃。
+- 必须有后端最小 API 服务与已发布模型，图片检测才可完成端到端 smoke。
+- 构建可能出现 Element Plus/Vite chunk size 警告，不影响 Batch1 功能。
+- 若后端契约继续调整，仅在 `src/api/` 与 `src/types/` 小范围同步，不进入 Batch2。

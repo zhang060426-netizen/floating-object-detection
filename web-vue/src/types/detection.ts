@@ -29,6 +29,22 @@ export interface DetectionObject {
   bbox_xywhn?: number[]
 }
 
+export interface DetectionArtifacts {
+  original_image?: FileRef | string
+  original_image_key?: string
+  result_image?: FileRef | string
+  result_image_url?: string
+  annotated_image_key?: string
+  result_image_key?: string
+  dev_placeholder?: boolean
+  placeholder?: boolean
+  reason?: string
+  enhanced_image?: FileRef | string
+  enhanced_image_url?: string
+  crops?: Array<FileRef | string>
+  [key: string]: unknown
+}
+
 export interface DetectionResult {
   schema_version?: string
   source_type?: string
@@ -52,17 +68,19 @@ export interface DetectionResult {
     confidence_threshold?: number
     by_class?: Record<string, number>
   }
-  artifacts?: Record<string, unknown>
+  artifacts?: DetectionArtifacts
   timing?: {
     inference_ms?: number
   }
   timing_ms?: Record<string, number>
+  raw?: Record<string, unknown>
 }
 
 export interface ImageDetectionResponse {
   record_id?: string
-  original_image?: FileRef
-  result_image?: FileRef
+  original_image?: FileRef | string
+  result_image?: FileRef | string
+  result_image_url?: string
   detection_result: DetectionResult
 }
 
@@ -76,15 +94,18 @@ export interface DetectionRecord {
   create_time?: string
   created_at?: string
   updated_at?: string
-  original_image?: FileRef
-  result_image?: FileRef
+  original_image?: FileRef | string
+  result_image?: FileRef | string
   detection_result?: DetectionResult
   target_count?: number
+  confidence_threshold?: number
   model?: PublishedModel
 }
 
 export interface PageResult<T> {
-  items: T[]
+  items?: T[]
+  records?: T[]
+  list?: T[]
   total?: number
   page?: number
   page_size?: number

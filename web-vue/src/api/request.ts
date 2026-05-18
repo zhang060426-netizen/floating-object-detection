@@ -1,4 +1,4 @@
-import { ElMessage } from 'element-plus'
+﻿import { ElMessage } from 'element-plus'
 import router from '../router'
 import { clearToken, getToken } from '../stores/user'
 import type { ApiEnvelope } from '../types/api'
@@ -8,12 +8,14 @@ const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, ''
 export class ApiClientError extends Error {
   code?: number
   status?: number
+  detail?: unknown
 
-  constructor(message: string, code?: number, status?: number) {
+  constructor(message: string, code?: number, status?: number, detail?: unknown) {
     super(message)
     this.name = 'ApiClientError'
     this.code = code
     this.status = status
+    this.detail = detail
   }
 }
 
@@ -30,29 +32,31 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
   try {
     response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers })
   } catch {
-    throw new ApiClientError('无法连接后端服务，请确认 Flask API 已启动。')
+    throw new ApiClientError('无法连接后端 Flask API，请确认服务已启动。')
   }
 
   const text = await response.text()
-  const payload = text ? safeJson<ApiEnvelope<T>>(text) : undefined
+  const payload = text ? safeJson<unknown>(text, response.status) : undefined
 
   if (response.status === 401) {
     clearToken()
     ElMessage.error('登录已失效，请重新登录')
     await router.replace({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } })
-    throw new ApiClientError('登录已失效', 401, response.status)
+    throw new ApiClientError(readableError(payload, '登录已失效'), 401, response.status, payload)
   }
+
+  const envelope = isEnvelope<T>(payload) ? payload : undefined
 
   if (!response.ok) {
-    throw new ApiClientError(payload?.message || payload?.msg || `请求失败：HTTP ${response.status}`, payload?.code, response.status)
+    throw new ApiClientError(readableError(payload, `请求失败：HTTP ${response.status}`), envelope?.code, response.status, payload)
   }
 
-  if (payload && typeof payload.code === 'number') {
-    const ok = payload.code === 0 || payload.code === 200
+  if (envelope && typeof envelope.code === 'number') {
+    const ok = envelope.code === 0 || envelope.code === 200
     if (!ok) {
-      throw new ApiClientError(payload.message || payload.msg || '业务请求失败', payload.code, response.status)
+      throw new ApiClientError(readableError(envelope, '接口返回失败'), envelope.code, response.status, envelope)
     }
-    return payload.data
+    return envelope.data
   }
 
   return payload as T
@@ -62,10 +66,36 @@ export function toJsonBody(value: unknown): BodyInit {
   return JSON.stringify(value)
 }
 
-function safeJson<T>(text: string): T {
+function safeJson<T>(text: string, status?: number): T {
   try {
     return JSON.parse(text) as T
   } catch {
-    throw new ApiClientError('后端返回了非 JSON 响应。')
+    const snippet = text.trim().slice(0, 160)
+    throw new ApiClientError(snippet ? `后端返回非 JSON 响应：${snippet}` : '后端返回的 JSON 格式无效', undefined, status)
   }
+}
+
+function isEnvelope<T>(value: unknown): value is ApiEnvelope<T> {
+  return Boolean(value && typeof value === 'object' && ('code' in value || 'data' in value || 'msg' in value || 'message' in value))
+}
+
+function readableError(value: unknown, fallback: string): string {
+  if (!value || typeof value !== 'object') return fallback
+  const record = value as Record<string, unknown>
+  const direct = firstString(record.message, record.msg)
+  const error = record.error && typeof record.error === 'object' ? (record.error as Record<string, unknown>) : undefined
+  const data = record.data && typeof record.data === 'object' ? (record.data as Record<string, unknown>) : undefined
+  const reason = firstString(record.reason, error?.reason, data?.reason)
+  const field = firstString(error?.field, data?.field)
+  const parts = [direct || fallback]
+  if (reason && reason !== parts[0]) parts.push(`原因：${reason}`)
+  if (field) parts.push(`字段：${field}`)
+  return parts.join('；')
+}
+
+function firstString(...values: unknown[]): string {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim()
+  }
+  return ''
 }

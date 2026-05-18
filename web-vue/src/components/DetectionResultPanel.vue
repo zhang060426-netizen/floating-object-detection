@@ -1,40 +1,55 @@
-<template>
+﻿<template>
   <el-card class="page-card">
     <template #header>
       <div class="panel-header">
         <strong>检测结果</strong>
-        <el-tag v-if="result?.record_id" type="success">记录：{{ result.record_id }}</el-tag>
+        <el-tag v-if="result?.record_id" type="success">记录 {{ result.record_id }}</el-tag>
       </div>
     </template>
 
-    <el-empty v-if="!result" description="上传图片并开始检测后展示结果" />
+    <el-empty v-if="!result" description="请上传图片并开始检测，结果将在此处展示" />
     <template v-else>
+      <el-alert
+        v-if="isDevPlaceholder"
+        title="当前为开发占位结果：后端未执行真实推理或返回了 placeholder 标记。"
+        type="warning"
+        show-icon
+        :closable="false"
+        class="result-alert"
+      />
+
+      <el-alert
+        v-if="backendReason"
+        :title="`后端提示：${backendReason}`"
+        type="warning"
+        show-icon
+        :closable="false"
+        class="result-alert"
+      />
+
       <el-row :gutter="18">
         <el-col :xs="24" :md="12">
           <h4>结果图</h4>
-          <el-image
-            v-if="resultImageUrl"
-            :src="resultImageUrl"
-            :preview-src-list="[resultImageUrl]"
-            fit="contain"
-            class="result-image"
-          />
-          <el-alert v-else title="后端未返回结果图 URL，仅展示结构化检测列表。" type="warning" :closable="false" />
+          <AuthImage :source="resultImageRef" label="结果图" image-class="result-image" />
         </el-col>
         <el-col :xs="24" :md="12">
           <el-descriptions :column="1" border>
             <el-descriptions-item label="模型">{{ modelName }}</el-descriptions-item>
-            <el-descriptions-item label="目标数量">{{ detections.length }}</el-descriptions-item>
+            <el-descriptions-item label="检测数量">{{ detectionCount }}</el-descriptions-item>
             <el-descriptions-item label="最高置信度">{{ percent(detectionResult.summary?.max_confidence) }}</el-descriptions-item>
+            <el-descriptions-item label="平均置信度">{{ percent(detectionResult.summary?.avg_confidence) }}</el-descriptions-item>
+            <el-descriptions-item label="置信度阈值">{{ percent(detectionResult.summary?.confidence_threshold ?? detectionResult.model?.confidence_threshold) }}</el-descriptions-item>
             <el-descriptions-item label="推理耗时">{{ inferenceMs }}</el-descriptions-item>
           </el-descriptions>
 
           <el-alert
-            v-if="detections.length === 0"
+            v-if="detectionCount === 0"
             class="result-alert"
-            title="未检测到漂浮物目标"
+            title="未检测到目标"
+            description="后端返回成功，但 detections 为空。可调整阈值或更换图片后重试。"
             type="info"
             :closable="false"
+            show-icon
           />
 
           <el-table v-else :data="detections" size="small" class="result-table">
@@ -59,21 +74,40 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { ImageDetectionResponse } from '../types/detection'
-import { fileUrl } from '../api/file'
+import AuthImage from './AuthImage.vue'
+import type { DetectionArtifacts, FileRef, ImageDetectionResponse } from '../types/detection'
 import { bboxText, percent } from '../utils/format'
 
 const props = defineProps<{ result?: ImageDetectionResponse | null }>()
 
 const detectionResult = computed(() => props.result?.detection_result ?? { detections: [] })
 const detections = computed(() => detectionResult.value.detections ?? [])
-const resultImageUrl = computed(() => fileUrl(props.result?.result_image))
+const detectionCount = computed(() => detectionResult.value.summary?.total_detections ?? detections.value.length)
+const artifacts = computed(() => detectionResult.value.artifacts)
+const resultImageRef = computed(() =>
+  props.result?.result_image ||
+  props.result?.result_image_url ||
+  artifacts.value?.result_image ||
+  artifacts.value?.result_image_url ||
+  artifactKeyRef(artifacts.value, 'result_image_key') ||
+  artifactKeyRef(artifacts.value, 'annotated_image_key'),
+)
 const modelName = computed(() => detectionResult.value.model?.model_name || detectionResult.value.model?.model_id || '-')
 const inferenceMs = computed(() => {
   const value = detectionResult.value.timing?.inference_ms ?? detectionResult.value.timing_ms?.inference_ms
   return value === undefined ? '-' : `${value} ms`
 })
+const isDevPlaceholder = computed(() => Boolean(artifacts.value?.dev_placeholder || artifacts.value?.placeholder))
+const backendReason = computed(() => stringValue(artifacts.value?.reason) || stringValue(detectionResult.value.raw?.reason))
 
+function artifactKeyRef(artifact: DetectionArtifacts | undefined, key: 'result_image_key' | 'annotated_image_key'): FileRef | null {
+  const value = artifact?.[key]
+  return typeof value === 'string' && value ? { bucket: 'results', object_key: value } : null
+}
+
+function stringValue(value: unknown): string {
+  return typeof value === 'string' ? value : ''
+}
 </script>
 
 <style scoped>

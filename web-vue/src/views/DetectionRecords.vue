@@ -67,7 +67,7 @@ async function loadRecords() {
 }
 
 function normalizePage(data: PageResult<DetectionRecord>): DetectionRecord[] {
-  return data.items ?? []
+  return data.items ?? data.records ?? data.list ?? []
 }
 </script>
 
