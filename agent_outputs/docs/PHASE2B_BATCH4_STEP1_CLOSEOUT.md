@@ -124,11 +124,13 @@ no video/realtime/Word/Dashboard: PASS
 ## 6. Stable Tag and Push Status
 
 ```text
-stable tag: NOT CREATED
+stable tag: phase2b-batch4-step1-backend-timing-stable
+stable commit: 2f94ddcc323595aa694f930fc96e2ba411bbf268
 push: NOT DONE
 ```
 
-No stable tag was created during Step 1 closeout. No push was performed.
+The Batch4 Step 1 stable tag was created after verification and before any push.
+No push was performed.
 
 ## 7. Rollback Plan
 

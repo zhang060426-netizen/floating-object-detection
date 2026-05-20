@@ -108,12 +108,13 @@ no video/realtime/Word/Dashboard: PASS
 ## 5. Release / Remote State
 
 ```text
-stable tag: NOT CREATED
+stable tag: phase2b-batch4-step1-backend-timing-stable
+stable commit: 2f94ddcc323595aa694f930fc96e2ba411bbf268
 push: NOT DONE
 Step 2: NOT AUTHORIZED
 ```
 
-No tag creation, push, or Step 2 activity is authorized by this evidence archive.
+The stable tag exists and points to the verified Step 1 merge commit. No push or Step 2 activity is authorized by this evidence archive.
 
 ## 6. Docs/Test Scope Assertion
 
