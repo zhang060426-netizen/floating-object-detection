@@ -43,7 +43,11 @@
             <el-descriptions-item label="最高置信度">{{ percent(detectionResult.summary?.max_confidence) }}</el-descriptions-item>
             <el-descriptions-item label="平均置信度">{{ percent(detectionResult.summary?.avg_confidence ?? detectionResult.summary?.mean_confidence) }}</el-descriptions-item>
             <el-descriptions-item label="置信度阈值">{{ percent(threshold) }}</el-descriptions-item>
-            <el-descriptions-item label="推理耗时">{{ inferenceMs }}</el-descriptions-item>
+            <template v-if="timingItems.length > 0">
+              <el-descriptions-item v-for="item in timingItems" :key="item.key" :label="item.label">
+                {{ item.value }}
+              </el-descriptions-item>
+            </template>
           </el-descriptions>
 
           <el-alert
@@ -81,7 +85,16 @@ import { computed } from 'vue'
 import AuthImage from './AuthImage.vue'
 import type { ImageDetectionResponse } from '../types/detection'
 import { bboxText, percent } from '../utils/format'
-import { backendReason, confidenceThreshold, detectionCount, detectionStatus, isDevPlaceholder, modelDisplayName, resultImageRef } from '../utils/detectionDisplay'
+import {
+  backendReason,
+  confidenceThreshold,
+  detectionCount,
+  detectionStatus,
+  isDevPlaceholder,
+  modelDisplayName,
+  resultImageRef,
+  timingDisplayItems,
+} from '../utils/detectionDisplay'
 
 const props = defineProps<{ result?: ImageDetectionResponse | null }>()
 
@@ -94,10 +107,7 @@ const threshold = computed(() => confidenceThreshold(null, detectionResult.value
 const status = computed(() => detectionStatus(detectionResult.value, props.result))
 const statusText = computed(() => (status.value === 'detected' ? 'detected' : status.value === 'no_detection' ? 'no_detection' : status.value))
 const statusTagType = computed(() => (status.value === 'detected' ? 'success' : status.value === 'no_detection' ? 'info' : 'warning'))
-const inferenceMs = computed(() => {
-  const value = detectionResult.value.timing?.inference_ms ?? detectionResult.value.timing_ms?.inference_ms
-  return value === undefined ? '-' : `${value} ms`
-})
+const timingItems = computed(() => timingDisplayItems(detectionResult.value))
 const isDevPlaceholderResult = computed(() => isDevPlaceholder(detectionResult.value))
 const reasonText = computed(() => backendReason(detectionResult.value, detectionResult.value.artifacts))
 </script>
