@@ -115,4 +115,12 @@ Can Batch4 enter implementation now? NO
 ```
 
 The only allowed next step is planning review and creation of planning artifacts. Any implementation requires a separate explicit gate after planning is complete.
+## 8. Step 1 Authorization Reference
 
+When Step 1 is explicitly authorized, the controlling implementation authorization record is:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP1_IMPLEMENTATION_AUTHORIZATION.md
+```
+
+A separate GO Decision document may be used to open the implementation lane, but it does not change the planning gate status in this file.

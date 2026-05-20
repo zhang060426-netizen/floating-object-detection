@@ -6,11 +6,11 @@ Baseline tag: `phase2b-batch3-docker-compose-stable`
 Baseline code point: `fddb0c8`
 Archive commit: `ff731de`
 Step 1 name: Backend single-image detection timing metadata additive implementation
-Current Step 1 gate: NO-GO until a separate GO review passes
+Current Step 1 gate: GO Decision recorded; implementation may begin in an independent backend worktree
 
 ## 1. Authorization Intent
 
-This document prepares Phase 2B Batch4 Step 1 for a later GO review.
+This document records the Step 1 authorization boundary that is now paired with the GO Decision document.
 
 It does **not** authorize implementation in this turn.
 It does **not** authorize any code, schema, model, Docker, or frontend change.
@@ -116,6 +116,5 @@ If Step 1 is later authorized and needs rollback:
 
 This document authorizes **preparation for Step 1 only**.
 
-It does not authorize implementation yet.
-A separate GO review is still required before Backend Agent may begin code changes.
-After that GO review passes, Backend Agent may enter implementation for this one narrow scope only.
+This document now serves as the implementation authorization boundary for the GO decision. Backend Agent may enter implementation for this one narrow scope only, in an independent backend worktree, while preserving the hard constraints above.
+
