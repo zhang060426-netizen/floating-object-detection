@@ -1,4 +1,4 @@
-﻿import hashlib
+import hashlib
 import importlib.metadata
 import importlib.util
 import time
@@ -75,16 +75,22 @@ def _load_yolo(weight_path):
 
 def run_yolo_image(image_path, model_row, confidence_threshold=0.5):
     start = time.perf_counter()
+    model_load_start = time.perf_counter()
     model = _load_yolo(model_row["weight_path"])
+    model_load_ms = (time.perf_counter() - model_load_start) * 1000
     results = model(str(image_path), conf=confidence_threshold, verbose=False)
     inference_ms = (time.perf_counter() - start) * 1000
+    postprocess_start = time.perf_counter()
+    timings = {"inference_ms": inference_ms, "model_load_ms": model_load_ms}
     if not results:
-        return [], inference_ms
+        timings["postprocess_ms"] = (time.perf_counter() - postprocess_start) * 1000
+        return [], timings
     result = results[0]
     detections = []
     boxes = getattr(result, "boxes", None)
     if boxes is None:
-        return detections, inference_ms
+        timings["postprocess_ms"] = (time.perf_counter() - postprocess_start) * 1000
+        return detections, timings
     xyxy = boxes.xyxy.cpu().tolist() if getattr(boxes, "xyxy", None) is not None else []
     xywhn = boxes.xywhn.cpu().tolist() if getattr(boxes, "xywhn", None) is not None else []
     confs = boxes.conf.cpu().tolist() if getattr(boxes, "conf", None) is not None else []
@@ -109,7 +115,8 @@ def run_yolo_image(image_path, model_row, confidence_threshold=0.5):
             "track_id": None,
             "crop_key": None,
         })
-    return detections, inference_ms
+    timings["postprocess_ms"] = (time.perf_counter() - postprocess_start) * 1000
+    return detections, timings
 
 
 def draw_result_image(source_path, target_path, detections):

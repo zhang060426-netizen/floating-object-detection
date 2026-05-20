@@ -119,7 +119,14 @@ def test_detection_image_invalid_image_error(client):
 def test_detection_image_no_detection_branch(client, monkeypatch):
     import services.detection_service as detection_service
 
-    monkeypatch.setattr(detection_service, "run_yolo_image", lambda *_args, **_kwargs: ([], 12.5))
+    monkeypatch.setattr(
+        detection_service,
+        "run_yolo_image",
+        lambda *_args, **_kwargs: (
+            [],
+            {"inference_ms": 12.5, "model_load_ms": 3.0, "postprocess_ms": 1.0},
+        ),
+    )
     image, filename = _png_upload()
 
     rv = client.post(
@@ -135,6 +142,22 @@ def test_detection_image_no_detection_branch(client, monkeypatch):
     assert payload["detection_status"] == "no_detection"
     assert payload["detection_result"]["summary"]["total_detections"] == 0
     assert payload["detection_result"]["summary"]["detection_status"] == "no_detection"
+    assert payload["detection_result"]["schema_version"] == "detection_result.v1"
+    timing = payload["detection_result"]["timing"]
+    assert timing["inference_ms"] == 12.5
+    assert timing["model_load_ms"] == 3.0
+    assert timing["postprocess_ms"] == 1.0
+    assert timing["preprocess_ms"] >= 0
+    assert timing["result_image_save_ms"] >= 0
+    assert timing["record_save_ms"] >= 0
+    assert timing["total_api_ms"] >= 0
+
+    detail = client.get(f"/api/detection/records/{payload['record_id']}", headers=_login_headers(client))
+    assert detail.status_code == 200
+    saved_result = detail.get_json()["data"]["detection_result"]
+    assert saved_result["schema_version"] == "detection_result.v1"
+    assert saved_result["timing"]["total_api_ms"] == timing["total_api_ms"]
+    assert saved_result["timing"]["record_save_ms"] == timing["record_save_ms"]
 
 
 def test_detection_image_successful_detection_branch(client, monkeypatch):
@@ -154,7 +177,14 @@ def test_detection_image_successful_detection_branch(client, monkeypatch):
         "track_id": None,
         "crop_key": None,
     }
-    monkeypatch.setattr(detection_service, "run_yolo_image", lambda *_args, **_kwargs: ([detection], 10.0))
+    monkeypatch.setattr(
+        detection_service,
+        "run_yolo_image",
+        lambda *_args, **_kwargs: (
+            [detection],
+            {"inference_ms": 10.0, "model_load_ms": 2.0, "postprocess_ms": 0.5},
+        ),
+    )
     image, filename = _png_upload()
 
     rv = client.post(
@@ -171,3 +201,12 @@ def test_detection_image_successful_detection_branch(client, monkeypatch):
     assert payload["result_image"]["url"].startswith("/api/files/results/")
     assert payload["detection_result"]["summary"]["total_detections"] == 1
     assert payload["detection_result"]["summary"]["detection_status"] == "detected"
+    assert payload["detection_result"]["schema_version"] == "detection_result.v1"
+    timing = payload["detection_result"]["timing"]
+    assert timing["inference_ms"] == 10.0
+    assert timing["model_load_ms"] == 2.0
+    assert timing["postprocess_ms"] == 0.5
+    assert timing["preprocess_ms"] >= 0
+    assert timing["result_image_save_ms"] >= 0
+    assert timing["record_save_ms"] >= 0
+    assert timing["total_api_ms"] >= 0
