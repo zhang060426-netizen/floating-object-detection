@@ -168,3 +168,61 @@ mAP50-95: 0.659
 - 多类别检测
 - 实时告警系统
 - 水域治理数据分析
+
+# Phase 2B Batch3 稳定基线（2026-05-20）
+
+当前最新稳定基线：
+
+```text
+phase2b-batch3-docker-compose-stable
+```
+
+Tag target commit：
+
+```text
+fddb0c83486abaa3403db030c1d8d0e994331dab
+```
+
+Batch3 最终状态：
+
+```text
+Phase 2B Batch3 Closeout: COMPLETE
+Final Smoke Verification: PASS
+Current HEAD at closeout: fddb0c8
+Working tree before archive: clean
+Batch4: NOT ENTERED
+Push: NOT DONE
+```
+
+Final smoke 摘要：
+
+- Docker compose config: PASS
+- Docker compose build --no-cache: PASS
+- Docker compose up/ps: PASS
+- Backend health: PASS
+- Backend DB health: PASS
+- Frontend HTTP 200: PASS
+- Login admin/admin123: PASS
+- Image detection API: PASS
+- Result image: PASS
+- Records save/read: PASS
+- `detection_result.v1`: PRESERVED
+- Runtime model mount: PASS
+- Docker compose down: PASS
+
+Final smoke 在纯英文路径执行：
+
+```text
+E:\MM\floating-smoke-master
+```
+
+原因：原中文路径触发 Docker Desktop / BuildKit / buildx 非 ASCII session 问题：
+
+```text
+x-docker-expose-session-sharedkey contains value with non-printable ASCII characters
+```
+
+上下文恢复时，应以 `phase2b-batch3-docker-compose-stable` 作为最新稳定基线。下一步只允许开启 Batch4 Planning，不允许直接进入 Batch4 implementation。
+
+当前禁止范围：视频、实时、Word、Dashboard、大屏、训练、改类别、改权重、破坏 `detection_result.v1`。
+

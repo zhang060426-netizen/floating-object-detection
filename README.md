@@ -1,4 +1,4 @@
-﻿# 水面漂浮物智能检测平台
+# 水面漂浮物智能检测平台
 
 > 基于 **YOLO 目标检测 + 多模态 AI 分析** 的水面漂浮物检测、分析与治理辅助平台。当前阶段目标是系统级梳理、工程化升级规划与多 Agent 协作拆分，不直接进入大规模编码实现。
 
@@ -66,3 +66,24 @@
 2. 按任务类型读取专项文档。
 3. 跨模块改动必须先更新文档和共享契约，再实现。
 4. 补齐完整前后端源码后，先对“待源码确认”条目做复核，再进入重构或功能开发。
+
+## Phase 2B Batch3 当前稳定版本
+
+最新稳定基线：`phase2b-batch3-docker-compose-stable`
+
+- Tag target：`fddb0c83486abaa3403db030c1d8d0e994331dab`
+- Closeout：COMPLETE
+- Final Smoke Verification：PASS
+- Docker Compose config/build/up：PASS
+- Backend health/db：PASS
+- Frontend HTTP 200：PASS
+- Login `admin/admin123`：PASS
+- Image detection API / result image / records save-read：PASS
+- `detection_result.v1`：PRESERVED
+- Runtime model mount：PASS
+- Batch4：NOT ENTERED
+
+Final smoke 在 `E:\MM\floating-smoke-master` 执行，以规避原中文路径触发的 Docker BuildKit/buildx 非 ASCII session 问题。
+
+下一步只允许开启 Batch4 Planning，不允许直接进入 Batch4 implementation。
+
