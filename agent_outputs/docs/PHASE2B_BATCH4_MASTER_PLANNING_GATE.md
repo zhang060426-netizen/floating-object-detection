@@ -143,3 +143,13 @@ tasks/docs/TASK_PHASE2B_BATCH4_STEP2_PLANNING.md
 ```
 
 This reference does not authorize Step 2 implementation.
+
+## 10. Step 2 Authorization Reference
+
+When Step 2 is explicitly authorized, the controlling implementation authorization record is:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP2_IMPLEMENTATION_GO_DECISION.md
+```
+
+This reference does not change the planning gate status in this file.
