@@ -1,24 +1,44 @@
+# Docker build context excludes local/generated artifacts.
 .git
 .omx
+.omx/**
 .ccpanes
 agent_outputs
-**/__pycache__/
-**/.pytest_cache/
-**/*.py[cod]
-**/*.pyo
-**/.DS_Store
-web-vue/node_modules/
-web-vue/dist/
-web-vue/.vite/
 
-# Runtime state must be provided by Docker volumes, not baked into the image.
+# Runtime/local state must be provided by bind mounts or local setup, not baked into images.
 runtime/**
+storage/**
+logs/**
+uploads/**
+results/**
 web-flask/storage/app.sqlite3
 web-flask/storage/uploads/**
 web-flask/storage/results/**
 web-flask/storage/models/**
 
-# Do not commit or bake model weights in this backend image.
+# Frontend generated/dependency artifacts.
+node_modules/**
+**/node_modules/**
+dist/**
+**/dist/**
+web-vue/node_modules/**
+web-vue/dist/**
+web-vue/.vite/**
+**/.vite/**
+
+# Python generated/cache artifacts.
+__pycache__/**
+**/__pycache__/**
+.pytest_cache/**
+**/.pytest_cache/**
+**/*.py[cod]
+**/*.pyo
+**/*.pyc
+
+# Do not commit or bake model weights in images.
+*.pt
+*.pth
+*.onnx
 **/*.pt
 **/*.pth
 **/*.onnx
@@ -27,4 +47,9 @@ web-flask/storage/models/**
 
 # Local env files may contain secrets.
 *.env
+**/.env
+**/.env.*.local
 web-flask/.env
+
+# OS/editor noise.
+**/.DS_Store

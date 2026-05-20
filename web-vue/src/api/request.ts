@@ -40,7 +40,7 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
 
   let response: Response
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers })
+    response = await fetch(resolveApiUrl(path), { ...init, headers })
   } catch {
     throw new ApiClientError('无法连接后端 Flask API，请确认 smoke 服务已启动。')
   }
@@ -74,6 +74,15 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
 
 export function toJsonBody(value: unknown): BodyInit {
   return JSON.stringify(value)
+}
+
+
+function resolveApiUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) return path
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`
+  if (!API_BASE_URL) return normalizedPath
+  if (normalizedPath === API_BASE_URL || normalizedPath.startsWith(`${API_BASE_URL}/`)) return normalizedPath
+  return `${API_BASE_URL}${normalizedPath}`
 }
 
 function safeJson<T>(text: string, status?: number): T {

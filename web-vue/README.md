@@ -69,3 +69,52 @@ Responses may be wrapped as `{ code, message/msg, data }`; `code === 0` and `cod
 - Stage2 preserves `detection_result.v1` compatibility and only adds tolerant fallback fields for known backend variants.
 - `AuthImage` creates blob URLs for authenticated images and revokes the previous object URL on source change/unmount.
 - Build may show non-blocking Vite chunk-size warnings because Element Plus is bundled in the minimal app.
+
+## Phase 2B Batch3 Docker deployment
+
+Frontend Dockerization is intentionally static-only: the Vue app is built with `VITE_API_BASE_URL=/api` and served by nginx. Runtime API traffic uses the same browser origin and nginx proxies `/api/*` to the backend service on the compose network.
+
+### Files
+
+- `Dockerfile.frontend`: multi-stage Node build + nginx runtime image.
+- `deploy/nginx/default.conf.template`: nginx SPA fallback and `/api` reverse proxy.
+- `docker-compose.yml`: frontend service definition for the shared `floating-net` compose network.
+- `web-vue/.env.docker.example`: Docker/dev environment variables.
+
+### Build and run
+
+From repository root:
+
+```powershell
+# local frontend typecheck/build
+cd web-vue
+npm.cmd run build
+cd ..
+
+# image build only
+docker build -f Dockerfile.frontend -t floating-objects-frontend:phase2b-batch3 .
+
+# compose config validation
+docker compose config
+
+# start frontend; combine with Backend Agent compose when backend service is in a separate file
+docker compose up -d frontend
+```
+
+Browser entry: `http://localhost:8080`.
+
+The frontend expects a backend container reachable as `http://backend:5000` on the same Docker network. If Backend Agent's compose file is separate, run the two compose files together so the service name `backend` is registered on `floating-net`.
+
+### API routing contract
+
+- Browser calls `/api/...` on the frontend origin.
+- nginx forwards `/api/...` to `${BACKEND_UPSTREAM}`; default: `http://backend:5000`.
+- This preserves existing frontend request paths and does not change `detection_result.v1` consumption.
+
+### Rollback
+
+```powershell
+git checkout -- Dockerfile.frontend docker-compose.yml .dockerignore deploy/nginx/default.conf.template web-vue/.env.docker.example web-vue/README.md web-vue/DEPLOYMENT.md
+```
+
+If files are untracked, remove only the Batch3 Docker files listed above.
