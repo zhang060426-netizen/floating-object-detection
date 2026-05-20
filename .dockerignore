@@ -1,0 +1,30 @@
+.git
+.omx
+.ccpanes
+agent_outputs
+**/__pycache__/
+**/.pytest_cache/
+**/*.py[cod]
+**/*.pyo
+**/.DS_Store
+web-vue/node_modules/
+web-vue/dist/
+web-vue/.vite/
+
+# Runtime state must be provided by Docker volumes, not baked into the image.
+runtime/**
+web-flask/storage/app.sqlite3
+web-flask/storage/uploads/**
+web-flask/storage/results/**
+web-flask/storage/models/**
+
+# Do not commit or bake model weights in this backend image.
+**/*.pt
+**/*.pth
+**/*.onnx
+**/*.engine
+**/*.weights
+
+# Local env files may contain secrets.
+*.env
+web-flask/.env

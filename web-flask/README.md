@@ -26,6 +26,25 @@ Environment variables:
 - `APP_UPLOAD_MAX_MB` (default `16`)
 - `AI_MODEL_ROOT` (optional, defaults to project AI weights directory when discoverable)
 
+## Docker deployment
+
+Batch3 adds a reproducible backend container path without changing API response contracts or detection output shape.
+
+From repository root:
+
+```powershell
+docker build -f Dockerfile.backend -t floating-backend:phase2b-batch3 .
+docker compose up --build -d backend frontend
+```
+
+Container defaults:
+
+- `APP_DB_PATH=/app/runtime/db/app.sqlite3`
+- `APP_STORAGE_ROOT=/app/runtime`
+- `AI_MODEL_ROOT=/app/runtime/models`
+
+Compose mounts SQLite, models, uploads, and results as root-level runtime bind mounts under `./runtime`. The backend reads the default YOLO weight at `/app/runtime/models/yolo26n.pt`; model weights are not included in the image. See `web-flask/DEPLOYMENT.md` for run, smoke, and rollback commands.
+
 
 ## Runtime diagnostics
 
