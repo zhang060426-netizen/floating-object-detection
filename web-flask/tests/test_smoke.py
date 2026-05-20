@@ -56,4 +56,5 @@ def test_db_init_models_and_records_schema(client):
     assert detail.status_code == 200
     payload = detail.get_json()["data"]
     assert payload["detection_result"]["schema_version"] == "detection_result.v1"
+    assert "timing" not in payload["detection_result"]
     assert payload["original_image"]["url"].startswith("/api/files/uploads/")

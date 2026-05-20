@@ -1,4 +1,5 @@
-﻿import json
+import json
+import time
 import uuid
 
 from ai.yolo_infer import InferenceUnavailable, build_detection_result, draw_result_image, image_metadata, run_yolo_image
@@ -58,10 +59,38 @@ def save_record(db, user_id, model_id, original_image, result_image, detection_r
     return record_id
 
 
+def _normalize_inference_result(result):
+    detections, timing = result
+    if isinstance(timing, dict):
+        return detections, timing.copy()
+    return detections, {"inference_ms": timing}
+
+
+def _elapsed_ms(start):
+    return (time.perf_counter() - start) * 1000
+
+
+def _round_timing(timing):
+    return {
+        key: round(value, 3) if isinstance(value, (int, float)) and not isinstance(value, bool) else value
+        for key, value in timing.items()
+    }
+
+
+def _update_record_detection_result(db, record_id, detection_result):
+    db.execute(
+        "UPDATE detection_records SET detection_result=? WHERE id=?",
+        (json.dumps(detection_result, ensure_ascii=False), record_id),
+    )
+    db.commit()
+
+
 def detect_image(db, user, image_file, model_id, confidence_threshold=0.5, save_record_flag=True):
+    api_start = time.perf_counter()
     model = get_model(db, model_id)
     if not model:
         raise ValueError("model not found or unpublished")
+    preprocess_start = time.perf_counter()
     try:
         upload_bucket, upload_key, upload_path = save_upload(image_file, "uploads", "images")
     except ValueError as exc:
@@ -78,10 +107,13 @@ def detect_image(db, user, image_file, model_id, confidence_threshold=0.5, save_
             reason="invalid_image",
             details={"filename": image_file.filename or upload_path.name},
         ) from exc
+    preprocess_ms = _elapsed_ms(preprocess_start)
 
-    detections, inference_ms = run_yolo_image(upload_path, model, confidence_threshold)
+    detections, inference_timing = _normalize_inference_result(run_yolo_image(upload_path, model, confidence_threshold))
+    result_image_start = time.perf_counter()
     result_bucket, result_key, result_path = copy_result_image(upload_path, image_file.filename or upload_path.name)
     draw_result_image(upload_path, result_path, detections)
+    result_image_save_ms = _elapsed_ms(result_image_start)
 
     original_info = file_info(upload_bucket, upload_key)
     result_info = file_info(result_bucket, result_key)
@@ -96,11 +128,22 @@ def detect_image(db, user, image_file, model_id, confidence_threshold=0.5, save_
         detections,
         artifacts,
         confidence_threshold,
-        timings={"inference_ms": inference_ms, "device": None, "model_cached": False},
+        timings=_round_timing({
+            **inference_timing,
+            "preprocess_ms": preprocess_ms,
+            "result_image_save_ms": result_image_save_ms,
+            "device": None,
+            "model_cached": False,
+        }),
     )
     record_id = None
     if save_record_flag:
+        record_save_start = time.perf_counter()
         record_id = save_record(db, user["id"], model_id, original_info, result_info, detection_result, confidence_threshold)
+        detection_result["timing"]["record_save_ms"] = round(_elapsed_ms(record_save_start), 3)
+    detection_result["timing"]["total_api_ms"] = round(_elapsed_ms(api_start), 3)
+    if record_id:
+        _update_record_detection_result(db, record_id, detection_result)
     detection_status = detection_result["summary"]["detection_status"]
     return {
         "record_id": record_id,
