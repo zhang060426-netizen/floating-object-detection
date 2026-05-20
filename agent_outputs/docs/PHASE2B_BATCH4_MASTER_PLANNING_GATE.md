@@ -124,3 +124,22 @@ agent_outputs/docs/PHASE2B_BATCH4_STEP1_IMPLEMENTATION_AUTHORIZATION.md
 ```
 
 A separate GO Decision document may be used to open the implementation lane, but it does not change the planning gate status in this file.
+
+## 9. Step 2 Planning Reference
+
+Step 2 planning artifacts are allowed to exist as documentation only.
+
+Recommended future planning / authorization artifact:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP2_FRONTEND_TIMING_PLANNING.md
+```
+
+Supporting task files:
+
+```text
+tasks/frontend/TASK_PHASE2B_BATCH4_STEP2_PLANNING.md
+tasks/docs/TASK_PHASE2B_BATCH4_STEP2_PLANNING.md
+```
+
+This reference does not authorize Step 2 implementation.
