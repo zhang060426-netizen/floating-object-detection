@@ -1,5 +1,15 @@
 import type { DetectionArtifacts, DetectionRecord, DetectionResult, FileRef, ImageDetectionResponse } from '../types/detection'
 
+const TIMING_DISPLAY_ITEMS = [
+  { key: 'total_api_ms', label: '总耗时' },
+  { key: 'inference_ms', label: '推理耗时' },
+  { key: 'model_load_ms', label: '模型加载' },
+  { key: 'preprocess_ms', label: '预处理' },
+  { key: 'postprocess_ms', label: '后处理' },
+  { key: 'result_image_save_ms', label: '结果图保存' },
+  { key: 'record_save_ms', label: '记录保存' },
+] as const
+
 export function detectionCount(result?: DetectionResult | null, record?: DetectionRecord | null): number {
   return (
     record?.target_count ??
@@ -70,6 +80,18 @@ export function resultImageRef(
 export function isDevPlaceholder(result?: DetectionResult | null): boolean {
   const artifacts = result?.artifacts
   return Boolean(artifacts?.dev_placeholder || artifacts?.placeholder || result?.raw?.is_dev_placeholder)
+}
+
+export function timingDisplayItems(result?: DetectionResult | null): Array<{ key: string; label: string; value: string }> {
+  const timing = result?.timing
+  const legacyTiming = result?.timing_ms
+  return TIMING_DISPLAY_ITEMS.reduce<Array<{ key: string; label: string; value: string }>>((items, item) => {
+    const value = timing?.[item.key] ?? legacyTiming?.[item.key]
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      items.push({ key: item.key, label: item.label, value: `${value} ms` })
+    }
+    return items
+  }, [])
 }
 
 function artifactKeyRef(artifact: DetectionArtifacts | undefined, key: string, bucket: string): FileRef | null {

@@ -77,7 +77,13 @@ export interface DetectionResult {
   }
   artifacts?: DetectionArtifacts
   timing?: {
+    total_api_ms?: number
     inference_ms?: number
+    model_load_ms?: number
+    preprocess_ms?: number
+    postprocess_ms?: number
+    result_image_save_ms?: number
+    record_save_ms?: number
   }
   timing_ms?: Record<string, number>
   raw?: Record<string, unknown>

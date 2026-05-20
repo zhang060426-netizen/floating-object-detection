@@ -17,7 +17,11 @@
               <el-descriptions-item label="目标数量">{{ count }}</el-descriptions-item>
               <el-descriptions-item label="最高置信度">{{ percent(detectionResult?.summary?.max_confidence) }}</el-descriptions-item>
               <el-descriptions-item label="平均置信度">{{ percent(detectionResult?.summary?.avg_confidence ?? detectionResult?.summary?.mean_confidence) }}</el-descriptions-item>
-              <el-descriptions-item label="推理耗时">{{ inferenceMs }}</el-descriptions-item>
+              <template v-if="timingItems.length > 0">
+                <el-descriptions-item v-for="item in timingItems" :key="item.key" :label="item.label">
+                  {{ item.value }}
+                </el-descriptions-item>
+              </template>
             </el-descriptions>
 
             <el-alert
@@ -83,7 +87,16 @@ import AuthImage from '../components/AuthImage.vue'
 import { fetchDetectionRecord } from '../api/detection'
 import type { DetectionRecord } from '../types/detection'
 import { bboxText, percent, recordTime } from '../utils/format'
-import { backendReason, confidenceThreshold, detectionCount, detectionStatus, modelDisplayName, originalImageRef, resultImageRef } from '../utils/detectionDisplay'
+import {
+  backendReason,
+  confidenceThreshold,
+  detectionCount,
+  detectionStatus,
+  modelDisplayName,
+  originalImageRef,
+  resultImageRef,
+  timingDisplayItems,
+} from '../utils/detectionDisplay'
 
 const props = defineProps<{ id: string }>()
 const loading = ref(false)
@@ -99,10 +112,7 @@ const status = computed(() => detectionStatus(detectionResult.value))
 const originalRef = computed(() => originalImageRef(record.value, detectionResult.value))
 const resultRef = computed(() => resultImageRef(null, record.value, detectionResult.value))
 const reasonText = computed(() => backendReason(detectionResult.value, detectionResult.value?.artifacts))
-const inferenceMs = computed(() => {
-  const value = detectionResult.value?.timing?.inference_ms ?? detectionResult.value?.timing_ms?.inference_ms
-  return value === undefined ? '-' : `${value} ms`
-})
+const timingItems = computed(() => timingDisplayItems(detectionResult.value))
 
 onMounted(loadRecord)
 
