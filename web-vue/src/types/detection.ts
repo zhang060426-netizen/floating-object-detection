@@ -121,7 +121,15 @@ export interface PageResult<T> {
   items?: T[]
   records?: T[]
   list?: T[]
+  data?: T[]
   total?: number
+  page?: number
+  page_size?: number
+  pageSize?: number
+  current_page?: number
+}
+
+export interface DetectionRecordQuery {
   page?: number
   page_size?: number
 }
