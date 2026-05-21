@@ -226,3 +226,25 @@ x-docker-expose-session-sharedkey contains value with non-printable ASCII charac
 
 当前禁止范围：视频、实时、Word、Dashboard、大屏、训练、改类别、改权重、破坏 `detection_result.v1`。
 
+# Phase 2B Batch4 Step 2 Stable Baseline Archive (2026-05-21)
+
+```text
+latest stable baseline: phase2b-batch4-step2-frontend-timing-stable
+stable commit: 78b9896c133bfdf59b99a03a41348b3a372885b8
+Step 2 status: CLOSED / VERIFIED / TAGGED
+Step 2 completed: Frontend display backend timing metadata
+Step 2 implementation commit: 6d9713f
+Step 2 merge commit: 7032185
+Step 2 closeout merge commit: 78b9896
+detection_result.v1: PRESERVED
+timing behavior:
+  - detection_result.timing consumed
+  - detection_result.timing_ms legacy fallback preserved
+  - timing optional
+  - missing timing / legacy no timing compatible
+Step 3: NOT AUTHORIZED
+push: NOT DONE
+```
+
+This is a documentation-only post-tag archive. It does not authorize Step 3, push, new tags, backend work, frontend implementation work, Docker work, DB schema changes, runtime/storage changes, model/weight/category/training changes, video/realtime/Word/Dashboard work.
+

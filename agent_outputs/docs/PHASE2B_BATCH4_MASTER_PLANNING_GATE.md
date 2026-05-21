@@ -160,10 +160,15 @@ Step 2 implementation has been merged and is documented by the Step 2 evidence /
 
 ```text
 Step 2 name: Frontend display backend timing metadata
+Step 2 status: CLOSED / VERIFIED / TAGGED
+Step 2 completed: Frontend display backend timing metadata
 implementation commit: 6d9713f
 merge commit: 7032185
-master HEAD: 7032185
-stable tag: NOT CREATED
+closeout merge commit: 78b9896
+master HEAD: 78b9896
+latest stable baseline: phase2b-batch4-step2-frontend-timing-stable
+stable tag: phase2b-batch4-step2-frontend-timing-stable
+stable commit: 78b9896c133bfdf59b99a03a41348b3a372885b8
 push: NOT DONE
 Step 3: NOT AUTHORIZED
 ```
@@ -175,4 +180,19 @@ agent_outputs/docs/PHASE2B_BATCH4_STEP2_VERIFICATION_EVIDENCE.md
 agent_outputs/docs/PHASE2B_BATCH4_STEP2_FRONTEND_TIMING_CLOSEOUT.md
 ```
 
-This reference records Step 2 evidence only. It does not authorize stable tag creation, push, or Step 3 implementation.
+This reference records Step 2 evidence and the post-closeout stable tag archive only. It does not authorize push or Step 3 implementation.
+
+Post-tag compatibility archive:
+
+```text
+detection_result.v1: PRESERVED
+timing behavior:
+  - detection_result.timing consumed
+  - detection_result.timing_ms legacy fallback preserved
+  - timing optional
+  - missing timing / legacy no timing compatible
+latest stable baseline: phase2b-batch4-step2-frontend-timing-stable
+stable commit: 78b9896c133bfdf59b99a03a41348b3a372885b8
+Step 3: NOT AUTHORIZED
+push: NOT DONE
+```

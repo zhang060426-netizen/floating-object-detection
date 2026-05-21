@@ -1,6 +1,6 @@
 ﻿# Phase 2B Batch4 Step 2 Verification Evidence
 
-Status: PASS
+Status: CLOSED / VERIFIED / TAGGED
 Date: 2026-05-20
 Owner: Docs/Test Agent
 Scope: Verification evidence archive for Phase 2B Batch4 Step 2 frontend timing metadata display.
@@ -9,12 +9,17 @@ Step 2 name: Frontend display backend timing metadata
 ## 0. Restored Context
 
 ```text
-master HEAD: 7032185
+master HEAD: 78b9896
 Step 2 implementation commit: 6d9713f
 Step 2 merge commit: 7032185
 Step 2 Implementation: MERGED TO master
+Step 2 status: CLOSED / VERIFIED / TAGGED
+Step 2 completed: Frontend display backend timing metadata
 post-merge verification: PASS
-stable tag: NOT CREATED
+Step 2 closeout merge commit: 78b9896
+latest stable baseline: phase2b-batch4-step2-frontend-timing-stable
+stable tag: phase2b-batch4-step2-frontend-timing-stable
+stable commit: 78b9896c133bfdf59b99a03a41348b3a372885b8
 push: NOT DONE
 Step 3: NOT AUTHORIZED
 ```
@@ -34,7 +39,10 @@ Related planning / authorization documents:
 | Implementation commit subject | `Implement Batch4 Step2 frontend timing display` | RECORDED |
 | Merge commit | `7032185` | RECORDED |
 | Merge commit subject | `Merge Phase 2B Batch4 Step2 frontend timing display` | RECORDED |
-| master HEAD | `7032185` | RECORDED |
+| master HEAD | `78b9896` | RECORDED |
+| Latest stable baseline | `phase2b-batch4-step2-frontend-timing-stable` | RECORDED |
+| Stable commit | `78b9896c133bfdf59b99a03a41348b3a372885b8` | RECORDED |
+| Step 2 closeout merge commit | `78b9896` | RECORDED |
 | Merge parentage | `088ffb3 6d9713f` | RECORDED |
 
 ## 2. Modified Implementation Files
@@ -57,7 +65,8 @@ No docs closeout task change in this worktree modifies those implementation file
 | Leader post-merge verification | PASS | Current task state records Step 2 post-merge verification as PASS. |
 | `detection_result.v1` preserved | PASS | Step 2 is frontend display-only and additive; backend contract remains unchanged. |
 | Timing optional metadata | PASS | Timing display is optional; absence does not block legacy rendering. |
-| `detection_result.timing_ms` compatibility | PASS | Frontend compatibility includes legacy `timing_ms` source shape. |
+| `detection_result.timing` consumed | PASS | Frontend consumes backend timing metadata when present. |
+| `detection_result.timing_ms` legacy fallback preserved | PASS | Frontend compatibility includes legacy `timing_ms` source shape. |
 | Timing missing / legacy no timing compatibility | PASS | Records without timing render normally. |
 | Forbidden scope check | PASS | No backend, Docker, DB, runtime/storage, model, training, video, realtime, Word, Dashboard, push, tag, or Step 3 work is authorized or entered. |
 
@@ -82,7 +91,9 @@ backend schema change: NO
 field deletion: NO
 field rename: NO
 existing field semantic break: NO
-legacy detection_result.timing_ms compatibility: YES
+detection_result.timing consumed: YES
+legacy detection_result.timing_ms fallback preserved: YES
+timing optional: YES
 timing missing compatibility: YES
 legacy no-timing record compatibility: YES
 ```
@@ -103,7 +114,7 @@ legacy no-timing record compatibility: YES
 | Word report | Not entered | PASS |
 | Dashboard / large-screen | Not entered | PASS |
 | Push | NOT DONE | PASS |
-| Stable tag | NOT CREATED | PASS |
+| Stable tag | `phase2b-batch4-step2-frontend-timing-stable` | PASS |
 | Step 3 implementation | NOT AUTHORIZED / NOT ENTERED | PASS |
 
 Boundary summary:
@@ -116,7 +127,9 @@ no DB schema: PASS
 no runtime/storage: PASS
 no models/weights/classes/training: PASS
 no video/realtime/Word/Dashboard: PASS
-stable tag: NOT CREATED
+latest stable baseline: phase2b-batch4-step2-frontend-timing-stable
+stable tag: phase2b-batch4-step2-frontend-timing-stable
+stable commit: 78b9896c133bfdf59b99a03a41348b3a372885b8
 push: NOT DONE
 Step 3: NOT AUTHORIZED
 ```
@@ -124,15 +137,38 @@ Step 3: NOT AUTHORIZED
 ## 6. Release / Remote State
 
 ```text
-stable tag: NOT CREATED
+latest stable baseline: phase2b-batch4-step2-frontend-timing-stable
+stable tag: phase2b-batch4-step2-frontend-timing-stable
+stable commit: 78b9896c133bfdf59b99a03a41348b3a372885b8
+Step 2 status: CLOSED / VERIFIED / TAGGED
+Step 2 implementation commit: 6d9713f
+Step 2 merge commit: 7032185
+Step 2 closeout merge commit: 78b9896
 push: NOT DONE
 Step 3: NOT AUTHORIZED
 ```
 
-No stable tag was created by this closeout documentation task. No push was performed. Step 3 remains explicitly unauthorized.
+The stable tag was already created before this post-tag documentation archive. No new tag was created by this documentation task. No push was performed. Step 3 remains explicitly unauthorized.
 
 ## 7. Docs/Test Scope Assertion
 
 This evidence archive is documentation-only. It does not modify `web-vue/**`, `web-flask/**`, Docker files, DB schema, runtime/storage, model weights, model classes/categories, training logic, video, realtime, Word, Dashboard, tags, remotes, or Step 3 implementation.
 
 Rollback for this evidence archive is documentation-only: revert this file and the paired Step 2 closeout document if the archive needs to be removed.
+
+## 8. Post-Tag Archive Assertion
+
+```text
+latest stable baseline: phase2b-batch4-step2-frontend-timing-stable
+stable commit: 78b9896c133bfdf59b99a03a41348b3a372885b8
+Step 2 status: CLOSED / VERIFIED / TAGGED
+Step 2 completed: Frontend display backend timing metadata
+detection_result.v1: PRESERVED
+timing behavior:
+  - detection_result.timing consumed
+  - detection_result.timing_ms legacy fallback preserved
+  - timing optional
+  - missing timing / legacy no timing compatible
+Step 3: NOT AUTHORIZED
+push: NOT DONE
+```
