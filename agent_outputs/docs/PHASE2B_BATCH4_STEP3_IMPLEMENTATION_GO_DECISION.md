@@ -10,7 +10,8 @@ Planning file: `agent_outputs/docs/PHASE2B_BATCH4_STEP3_DETECTION_RECORDS_PLANNI
 Latest stable baseline: `phase2b-batch4-step2-frontend-timing-stable`
 Stable baseline target: `78b9896c133bfdf59b99a03a41348b3a372885b8`
 Phase 2B Batch4 Step 2: CLOSED / VERIFIED / TAGGED / ARCHIVED
-Step 3 stable tag: NOT CREATED
+Step 3 stable tag: phase2b-batch4-step3-detection-records-stable
+Stable commit: `bfe3dc9298cdcb0cb405b4189b6db151d2fea1c6`
 Push: NOT DONE
 
 ## 1. GO / NO-GO Conclusion
@@ -211,3 +212,34 @@ Business code changes in this GO Decision document task: NOT DONE
 Step 3 stable tag: NOT CREATED
 Push: NOT DONE
 ```
+
+## Phase 2B Batch4 Step 3 Post-Tag Archive
+
+```text
+latest stable baseline: phase2b-batch4-step3-detection-records-stable
+stable commit: bfe3dc9298cdcb0cb405b4189b6db151d2fea1c6
+Step 3 status: CLOSED / VERIFIED / TAGGED
+Step 3 completed: Detection Records Management Enhancement
+Step 3 implementation commit: cfe8d75
+Step 3 frontend merge commit: e5a7b59
+Step 3 checklist commit: 1c5d415
+Step 3 stable tag commit: bfe3dc9
+build: npm.cmd run build PASS
+backend: read-only verification PASS
+backend records API: supports page/page_size and returns items/total/page/page_size
+backend detail API: exists
+backend implementation required: NO
+detection_result.v1: PRESERVED
+forbidden scope:
+  - no backend change
+  - no Docker change
+  - no DB schema change
+  - no runtime/storage change
+  - no model/weights/classes/training change
+  - no Dashboard / Word / video / realtime
+  - no delete / bulk delete / edit records
+push: NOT DONE
+Step 4: NOT AUTHORIZED
+```
+
+This is a documentation-only post-tag archive. It records the already-created Step 3 stable tag and does not create a new tag, push, or authorize Step 4 implementation.

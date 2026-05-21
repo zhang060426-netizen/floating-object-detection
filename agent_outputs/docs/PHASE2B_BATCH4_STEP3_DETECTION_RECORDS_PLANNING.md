@@ -1,6 +1,6 @@
 # Phase 2B Batch4 Step 3 Planning / Gate - Detection Records Management Enhancement
 
-Status: PLANNING ONLY
+Status: PLANNING ARCHIVED / STEP 3 CLOSED / VERIFIED / TAGGED
 Date: 2026-05-21
 Phase: Phase 2B Batch4 Step 3
 Step 3 name: Phase 2B Batch4 Step 3 - Detection Records Management Enhancement
@@ -235,3 +235,34 @@ Push: NOT DONE
 Tag creation: NOT DONE
 Business code changes: NOT DONE
 ```
+
+## Phase 2B Batch4 Step 3 Post-Tag Archive
+
+```text
+latest stable baseline: phase2b-batch4-step3-detection-records-stable
+stable commit: bfe3dc9298cdcb0cb405b4189b6db151d2fea1c6
+Step 3 status: CLOSED / VERIFIED / TAGGED
+Step 3 completed: Detection Records Management Enhancement
+Step 3 implementation commit: cfe8d75
+Step 3 frontend merge commit: e5a7b59
+Step 3 checklist commit: 1c5d415
+Step 3 stable tag commit: bfe3dc9
+build: npm.cmd run build PASS
+backend: read-only verification PASS
+backend records API: supports page/page_size and returns items/total/page/page_size
+backend detail API: exists
+backend implementation required: NO
+detection_result.v1: PRESERVED
+forbidden scope:
+  - no backend change
+  - no Docker change
+  - no DB schema change
+  - no runtime/storage change
+  - no model/weights/classes/training change
+  - no Dashboard / Word / video / realtime
+  - no delete / bulk delete / edit records
+push: NOT DONE
+Step 4: NOT AUTHORIZED
+```
+
+This is a documentation-only post-tag archive. It records the already-created Step 3 stable tag and does not create a new tag, push, or authorize Step 4 implementation.
