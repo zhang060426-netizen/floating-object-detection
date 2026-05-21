@@ -11,18 +11,25 @@
             <el-descriptions :column="1" border>
               <el-descriptions-item label="记录 ID">{{ record.id }}</el-descriptions-item>
               <el-descriptions-item label="创建时间">{{ recordTime(record) }}</el-descriptions-item>
+              <el-descriptions-item label="文件名">{{ displayFilename }}</el-descriptions-item>
               <el-descriptions-item label="模型">{{ displayModelName }}</el-descriptions-item>
-              <el-descriptions-item label="检测状态">{{ status }}</el-descriptions-item>
+              <el-descriptions-item label="检测状态">
+                <el-tag :type="statusTagType">{{ status }}</el-tag>
+              </el-descriptions-item>
               <el-descriptions-item label="置信度阈值">{{ percent(threshold) }}</el-descriptions-item>
               <el-descriptions-item label="目标数量">{{ count }}</el-descriptions-item>
               <el-descriptions-item label="最高置信度">{{ percent(detectionResult?.summary?.max_confidence) }}</el-descriptions-item>
               <el-descriptions-item label="平均置信度">{{ percent(detectionResult?.summary?.avg_confidence ?? detectionResult?.summary?.mean_confidence) }}</el-descriptions-item>
-              <template v-if="timingItems.length > 0">
-                <el-descriptions-item v-for="item in timingItems" :key="item.key" :label="item.label">
-                  {{ item.value }}
-                </el-descriptions-item>
-              </template>
             </el-descriptions>
+
+            <el-alert
+              v-if="!detectionResult"
+              title="该记录缺少 detection_result，已按旧记录兼容展示基础信息。"
+              type="warning"
+              show-icon
+              :closable="false"
+              class="detail-section"
+            />
 
             <el-alert
               v-if="reasonText"
@@ -32,6 +39,22 @@
               :closable="false"
               class="detail-section"
             />
+
+            <div class="detail-section">
+              <h4>耗时信息</h4>
+              <el-descriptions v-if="timingItems.length > 0" :column="1" border size="small">
+                <el-descriptions-item v-for="item in timingItems" :key="item.key" :label="item.label">
+                  {{ item.value }}
+                </el-descriptions-item>
+              </el-descriptions>
+              <el-alert
+                v-else
+                title="该记录暂无耗时信息"
+                type="info"
+                show-icon
+                :closable="false"
+              />
+            </div>
 
             <h4>原图</h4>
             <AuthImage :source="originalRef" label="原图" image-class="detail-image" />
@@ -45,7 +68,7 @@
             <template #header><strong>检测目标</strong></template>
             <el-alert
               v-if="detections.length === 0"
-              title="该记录无检测目标"
+              :title="emptyDetectionMessage"
               type="info"
               show-icon
               :closable="false"
@@ -98,6 +121,8 @@ import {
   timingDisplayItems,
 } from '../utils/detectionDisplay'
 
+type TagType = 'success' | 'info' | 'warning' | 'danger'
+
 const props = defineProps<{ id: string }>()
 const loading = ref(false)
 const error = ref('')
@@ -107,8 +132,18 @@ const detectionResult = computed(() => record.value?.detection_result)
 const detections = computed(() => detectionResult.value?.detections ?? [])
 const count = computed(() => detectionCount(detectionResult.value, record.value))
 const displayModelName = computed(() => modelDisplayName(record.value, detectionResult.value))
+const displayFilename = computed(() => record.value?.filename || detectionResult.value?.image?.filename || record.value?.title || '-')
 const threshold = computed(() => confidenceThreshold(record.value, detectionResult.value))
 const status = computed(() => detectionStatus(detectionResult.value))
+const statusTagType = computed<TagType>(() => {
+  if (status.value === 'failed') return 'danger'
+  if (status.value === 'detected') return 'success'
+  if (status.value === 'processing' || status.value === 'pending') return 'warning'
+  return 'info'
+})
+const emptyDetectionMessage = computed(() => (
+  detectionResult.value ? '该记录无检测目标' : '该记录缺少 detection_result，无法读取检测目标。'
+))
 const originalRef = computed(() => originalImageRef(record.value, detectionResult.value))
 const resultRef = computed(() => resultImageRef(null, record.value, detectionResult.value))
 const reasonText = computed(() => backendReason(detectionResult.value, detectionResult.value?.artifacts))

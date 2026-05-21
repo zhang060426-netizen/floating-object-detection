@@ -2,9 +2,9 @@ import type { DetectionArtifacts, DetectionRecord, DetectionResult, FileRef, Ima
 
 const TIMING_DISPLAY_ITEMS = [
   { key: 'total_api_ms', label: '总耗时' },
-  { key: 'inference_ms', label: '推理耗时' },
   { key: 'model_load_ms', label: '模型加载' },
   { key: 'preprocess_ms', label: '预处理' },
+  { key: 'inference_ms', label: '推理' },
   { key: 'postprocess_ms', label: '后处理' },
   { key: 'result_image_save_ms', label: '结果图保存' },
   { key: 'record_save_ms', label: '记录保存' },
