@@ -227,3 +227,63 @@ Step 4: NOT AUTHORIZED
 ```
 
 This is a documentation-only post-tag archive. It records the already-created Step 3 stable tag and does not create a new tag, push, or authorize Step 4 implementation.
+
+## Phase 2B Batch4 Step 4 Verification / Closeout Archive
+
+```text
+Step 4 theme: Detection Record Detail Readability Enhancement
+Step 4 status: CLOSED / VERIFIED / DOCS ARCHIVED
+Planning commit: 2e0766e
+GO Decision commit: 2737622
+Frontend implementation commit: 8fa5348
+Frontend merge commit: 62715a1
+latest stable baseline: phase2b-batch4-step3-detection-records-stable
+latest stable baseline commit: bfe3dc9298cdcb0cb405b4189b6db151d2fea1c6
+verification:
+  - npm.cmd run build PASS
+  - git diff --check PASS
+  - master working tree clean
+  - frontend implementation included in master
+implementation summary:
+  - fixed timingDisplayItems Chinese label garbling
+  - added file name / original file name display
+  - displayed detection status with el-tag
+  - separated timing information
+  - made missing detection_result explicit
+  - made empty detections readable
+  - preserved JSON collapse
+  - preserved image display and detail API call logic
+scope guard:
+  - only frontend files changed:
+    - web-vue/src/views/DetectionRecordDetail.vue
+    - web-vue/src/utils/detectionDisplay.ts
+  - no backend changes
+  - no DB schema changes
+  - no Docker changes
+  - no runtime/storage changes
+  - no model/weights/classes/training changes
+  - no Dashboard / Word / video / realtime
+  - no delete / bulk delete / edit records
+  - no auth/login changes
+  - no upload/detection main flow semantic changes
+  - no API contract changes
+compatibility:
+  - missing detection_result compatible
+  - missing timing compatible
+  - legacy timing_ms compatible
+  - empty detections compatible
+  - old records compatible
+  - detection_result.v1 preserved
+Step 4 stable tag: NOT CREATED
+push: NOT DONE
+Step 5: NOT AUTHORIZED
+```
+
+Closeout artifacts:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP4_VERIFICATION_EVIDENCE.md
+agent_outputs/docs/PHASE2B_BATCH4_STEP4_DETAIL_READABILITY_CLOSEOUT.md
+```
+
+This is a documentation-only closeout archive. It does not create a tag, does not push, and does not authorize Step 5.
