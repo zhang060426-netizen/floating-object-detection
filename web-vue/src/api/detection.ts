@@ -1,5 +1,5 @@
 import { request } from './request'
-import type { DetectionRecord, ImageDetectionResponse, PageResult } from '../types/detection'
+import type { DetectionRecord, DetectionRecordQuery, ImageDetectionResponse, PageResult } from '../types/detection'
 
 export interface DetectImageOptions {
   image: File
@@ -21,8 +21,23 @@ export function detectImage(options: DetectImageOptions) {
   return request<ImageDetectionResponse>('/api/detection/image', { method: 'POST', body: form })
 }
 
-export function fetchDetectionRecords() {
-  return request<PageResult<DetectionRecord> | DetectionRecord[]>('/api/detection/records')
+export function fetchDetectionRecords(params?: DetectionRecordQuery) {
+  return request<PageResult<DetectionRecord> | DetectionRecord[]>(withQuery('/api/detection/records', params))
+}
+
+function withQuery(path: string, params?: DetectionRecordQuery): string {
+  if (!params) return path
+
+  const query = new URLSearchParams()
+  appendPositiveInteger(query, 'page', params.page)
+  appendPositiveInteger(query, 'page_size', params.page_size)
+  return query.size > 0 ? `${path}?${query.toString()}` : path
+}
+
+function appendPositiveInteger(query: URLSearchParams, key: string, value?: number): void {
+  if (typeof value === 'number' && Number.isInteger(value) && value > 0) {
+    query.set(key, String(value))
+  }
 }
 
 export function fetchDetectionRecord(id: string) {
