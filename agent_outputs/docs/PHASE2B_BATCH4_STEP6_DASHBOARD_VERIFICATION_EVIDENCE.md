@@ -228,3 +228,49 @@ Rollback is narrow and reversible:
 Phase 2B Batch4 Step 6 Dashboard 可视化增强 MVP: VERIFIED / DOCS ARCHIVED
 Reason: dashboard summary backend endpoint and frontend dashboard view are merged into master; backend compileall passed; backend pytest passed with 26 passed and 152 warnings; frontend build passed; diff check passed; status was recorded clean before docs closeout; forbidden scope remains unentered; push is not done; Step 6 stable tag is not created yet; Step 7 is not authorized.
 ```
+
+## 12. Post-Tag Evidence Update
+
+```text
+Step 6 stable tag: phase2b-batch4-step6-dashboard-stable
+tag target: 708a61a
+tag target commit message: Merge Phase 2B Batch4 Step6 dashboard verification evidence
+Step 6 status: CLOSED / STABLE / ARCHIVED
+push: NOT DONE
+Step 7: NOT AUTHORIZED
+```
+
+The Step 6 stable tag has now been created at the dashboard verification evidence merge commit. This updates the earlier pre-tag evidence state that recorded the tag as not yet created.
+
+Implementation summary retained for the tagged state:
+
+- Backend Dashboard summary API.
+- `GET /api/detection/dashboard/summary`.
+- JWT auth.
+- admin all / normal user own records.
+- `recent_records` default 5 max 10.
+- Frontend `Dashboard.vue`.
+- `/dashboard` route.
+- `/` redirect to `/dashboard`.
+- `AppLayout` Dashboard / ????.
+- API field mapping fix.
+- unified verification PASS.
+
+Verification retained for the tagged state:
+
+- compileall PASS.
+- pytest PASS, 26 passed, 152 warnings.
+- `npm.cmd run build` PASS.
+- git diff --check PASS.
+- git status clean.
+
+Confirmed NOT changed for the tagged state:
+
+- DB schema.
+- Docker/runtime/storage.
+- model/weights/class/training.
+- `detection_result.v1` semantics.
+- video/realtime implementation.
+- AI Agent / LLM feature.
+
+No push was performed. Step 7 remains explicitly unauthorized.

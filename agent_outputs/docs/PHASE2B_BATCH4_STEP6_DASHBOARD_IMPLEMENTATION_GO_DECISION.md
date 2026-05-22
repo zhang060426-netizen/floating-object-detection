@@ -432,3 +432,49 @@ Step 7: NOT AUTHORIZED
 ```
 
 This document authorizes implementation only within the file scopes and MVP requirements above. It does not itself implement code, push, tag, or authorize Step 7.
+
+## 15. Post-Tag Archive Update
+
+```text
+Step 6 stable tag: phase2b-batch4-step6-dashboard-stable
+tag target: 708a61a
+tag target commit message: Merge Phase 2B Batch4 Step6 dashboard verification evidence
+Step 6 status: CLOSED / STABLE / ARCHIVED
+push: NOT DONE
+Step 7: NOT AUTHORIZED
+```
+
+This post-tag archive update records the completed Step 6 outcome after the earlier GO Decision. It does not change the original GO Decision constraints; it records that the authorized Dashboard MVP was implemented, verified, merged, and tagged.
+
+Tagged implementation summary:
+
+- Backend Dashboard summary API.
+- `GET /api/detection/dashboard/summary`.
+- JWT auth.
+- admin all / normal user own records.
+- `recent_records` default 5 max 10.
+- Frontend `Dashboard.vue`.
+- `/dashboard` route.
+- `/` redirect to `/dashboard`.
+- `AppLayout` Dashboard / ????.
+- API field mapping fix.
+- unified verification PASS.
+
+Tagged verification summary:
+
+- compileall PASS.
+- pytest PASS, 26 passed, 152 warnings.
+- `npm.cmd run build` PASS.
+- git diff --check PASS.
+- git status clean.
+
+Confirmed NOT changed:
+
+- DB schema.
+- Docker/runtime/storage.
+- model/weights/class/training.
+- `detection_result.v1` semantics.
+- video/realtime implementation.
+- AI Agent / LLM feature.
+
+Push remains NOT DONE. Step 7 remains NOT AUTHORIZED.

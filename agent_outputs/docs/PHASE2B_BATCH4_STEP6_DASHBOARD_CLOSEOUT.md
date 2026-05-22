@@ -225,3 +225,47 @@ Recommended tag target: after evidence merge, not yet created
 push: NOT DONE
 Step 7: NOT AUTHORIZED
 ```
+
+## 11. Post-Tag Archive State
+
+```text
+Step 6 stable tag: phase2b-batch4-step6-dashboard-stable
+tag target: 708a61a
+tag target commit message: Merge Phase 2B Batch4 Step6 dashboard verification evidence
+Step 6 status: CLOSED / STABLE / ARCHIVED
+push: NOT DONE
+Step 7: NOT AUTHORIZED
+```
+
+Post-tag implementation summary:
+
+- Backend Dashboard summary API.
+- `GET /api/detection/dashboard/summary`.
+- JWT auth.
+- admin all / normal user own records.
+- `recent_records` default 5 max 10.
+- Frontend `Dashboard.vue`.
+- `/dashboard` route.
+- `/` redirect to `/dashboard`.
+- `AppLayout` Dashboard / ????.
+- API field mapping fix.
+- unified verification PASS.
+
+Post-tag verification:
+
+- compileall PASS.
+- pytest PASS, 26 passed, 152 warnings.
+- `npm.cmd run build` PASS.
+- git diff --check PASS.
+- git status clean.
+
+Post-tag boundary confirmation:
+
+- DB schema: NOT CHANGED.
+- Docker/runtime/storage: NOT CHANGED.
+- model/weights/class/training: NOT CHANGED.
+- `detection_result.v1` semantics: NOT CHANGED.
+- video/realtime implementation: NOT ENTERED.
+- AI Agent / LLM feature: NOT ENTERED.
+
+This post-tag archive records that the stable tag has been created. It does not push, create a new tag, modify business code, or authorize Step 7.

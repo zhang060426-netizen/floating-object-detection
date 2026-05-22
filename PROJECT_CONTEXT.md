@@ -420,3 +420,47 @@ agent_outputs/docs/PHASE2B_BATCH4_STEP6_DASHBOARD_CLOSEOUT.md
 Step 6 explicitly did not change DB schema, Dockerfile / `docker-compose.yml`, runtime/storage structure, model / weights / class / training, `detection_result.v1` semantics, image detection main flow semantics, auth/login semantics, video detection, realtime detection, AI Agent / LLM features, or Step 7.
 
 This archive does not push, does not create a tag, and does not authorize Step 7.
+
+## Phase 2B Batch4 Step 6 Post-Tag Archive (2026-05-22)
+
+```text
+Step 6 stable tag: phase2b-batch4-step6-dashboard-stable
+tag target: 708a61a
+tag target commit message: Merge Phase 2B Batch4 Step6 dashboard verification evidence
+Step 6 status: CLOSED / STABLE / ARCHIVED
+push: NOT DONE
+Step 7: NOT AUTHORIZED
+```
+
+Step 6 implementation summary:
+
+- Backend Dashboard summary API.
+- `GET /api/detection/dashboard/summary`.
+- JWT auth.
+- admin all / normal user own records.
+- `recent_records` default 5 max 10.
+- Frontend `Dashboard.vue`.
+- `/dashboard` route.
+- `/` redirect to `/dashboard`.
+- `AppLayout` Dashboard / ????.
+- API field mapping fix.
+- unified verification PASS.
+
+Unified verification:
+
+- compileall PASS.
+- pytest PASS, 26 passed, 152 warnings.
+- `npm.cmd run build` PASS.
+- git diff --check PASS.
+- git status clean.
+
+Confirmed NOT changed:
+
+- DB schema.
+- Docker/runtime/storage.
+- model/weights/class/training.
+- `detection_result.v1` semantics.
+- video/realtime implementation.
+- AI Agent / LLM feature.
+
+This is a documentation-only post-tag archive. It records the already-created Step 6 stable tag and does not push, create a new tag, edit business code, or authorize Step 7.
