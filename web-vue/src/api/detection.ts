@@ -1,4 +1,4 @@
-import { request } from './request'
+import { request, requestBlob } from './request'
 import type { DetectionRecord, DetectionRecordQuery, ImageDetectionResponse, PageResult } from '../types/detection'
 
 export interface DetectImageOptions {
@@ -42,4 +42,8 @@ function appendPositiveInteger(query: URLSearchParams, key: string, value?: numb
 
 export function fetchDetectionRecord(id: string) {
   return request<DetectionRecord>(`/api/detection/records/${encodeURIComponent(id)}`)
+}
+
+export function exportDetectionRecordWordReport(id: string) {
+  return requestBlob(`/api/detection/records/${encodeURIComponent(id)}/report.docx`)
 }
