@@ -1,6 +1,6 @@
 # Phase 2B Batch4 Step 4 Verification Evidence
 
-Status: CLOSED / VERIFIED / DOCS ARCHIVED
+Status: CLOSED / VERIFIED / TAGGED
 Date: 2026-05-21
 Owner: Docs/Test Agent
 Scope: Verification evidence archive for Phase 2B Batch4 Step 4 frontend detail readability enhancement.
@@ -13,7 +13,9 @@ branch: batch4-step4-docs-closeout
 master HEAD / frontend merge commit: 62715a1
 latest stable baseline: phase2b-batch4-step3-detection-records-stable
 latest stable baseline commit: bfe3dc9298cdcb0cb405b4189b6db151d2fea1c6
-Step 4 stable tag: NOT CREATED
+Step 4 stable tag: phase2b-batch4-step4-detail-readability-stable
+tag commit: 66349abc9ba3f8ad4a31afe85d5430a52b0a4393
+master HEAD before archive: 66349ab
 push: NOT DONE
 Step 5: NOT AUTHORIZED
 ```
@@ -127,12 +129,14 @@ detection_result.v1 preserved: YES
 ## 7. Release / Remote / Next-Step State
 
 ```text
-Step 4 stable tag: NOT CREATED
+Step 4 stable tag: phase2b-batch4-step4-detail-readability-stable
+tag commit: 66349abc9ba3f8ad4a31afe85d5430a52b0a4393
+master HEAD before archive: 66349ab
 push: NOT DONE
 Step 5: NOT AUTHORIZED
 ```
 
-This documentation archive does not create a tag, does not push, and does not authorize or enter Step 5.
+This documentation archive records the already-created stable tag, does not create a new tag, does not push, and does not authorize or enter Step 5.
 
 ## 8. Rollback Plan
 
@@ -141,3 +145,26 @@ Rollback is narrow and reversible:
 1. For this evidence archive, revert only this documentation commit and the paired Step 4 closeout document.
 2. For the Step 4 frontend implementation, revert merge commit `62715a1` or implementation commit `8fa5348` using normal Git review procedures.
 3. No backend, DB, Docker, runtime/storage, model, auth, upload, video, realtime, Word, Dashboard, or API-contract rollback is expected because those areas were not changed.
+
+## Phase 2B Batch4 Step 4 Post-Tag Archive
+
+```text
+Step 4 stable tag: phase2b-batch4-step4-detail-readability-stable
+tag commit: 66349abc9ba3f8ad4a31afe85d5430a52b0a4393
+master HEAD before archive: 66349ab
+Step 4 status: CLOSED / VERIFIED / TAGGED
+push: NOT DONE
+Step 5: NOT AUTHORIZED
+```
+
+Implementation summary:
+
+- Detection record detail page readability enhancement.
+- Fixed timing Chinese label garbling.
+- Added file name display.
+- Added detection status `el-tag`.
+- Displayed timing information as an independent section.
+- Compatible with missing `detection_result`, missing timing, legacy `timing_ms`, empty detections, and old records.
+- Preserved JSON collapse, image display, API contract, and `detection_result.v1` semantics.
+
+This is a documentation-only post-tag archive. It records the already-created Step 4 stable tag and does not push, create a new tag, edit business code, or authorize Step 5 implementation.

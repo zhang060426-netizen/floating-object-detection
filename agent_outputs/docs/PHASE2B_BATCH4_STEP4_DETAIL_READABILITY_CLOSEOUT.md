@@ -1,6 +1,6 @@
 # Phase 2B Batch4 Step 4 Detail Readability Closeout
 
-Status: CLOSED / VERIFIED / DOCS ARCHIVED
+Status: CLOSED / VERIFIED / TAGGED
 Final decision: CLOSED / VERIFIED
 Date: 2026-05-21
 Owner: Docs/Test Agent
@@ -21,7 +21,9 @@ npm.cmd run build: PASS
 git diff --check: PASS
 master working tree clean: PASS before docs closeout edits
 frontend implementation included in master: PASS
-Step 4 stable tag: NOT CREATED
+Step 4 stable tag: phase2b-batch4-step4-detail-readability-stable
+tag commit: 66349abc9ba3f8ad4a31afe85d5430a52b0a4393
+master HEAD before archive: 66349ab
 push: NOT DONE
 Step 5: NOT AUTHORIZED
 ```
@@ -54,7 +56,9 @@ Step 4 did not authorize backend work, DB schema work, Docker work, runtime/stor
 | Frontend merge subject | `Merge Phase 2B Batch4 Step4 detail readability enhancement` |
 | Frontend implementation included in master | YES |
 | Latest stable baseline | `phase2b-batch4-step3-detection-records-stable` |
-| Step 4 stable tag | NOT CREATED |
+| Step 4 stable tag | `phase2b-batch4-step4-detail-readability-stable` |
+| Tag commit | `66349abc9ba3f8ad4a31afe85d5430a52b0a4393` |
+| Master HEAD before archive | `66349ab` |
 | Push | NOT DONE |
 | Step 5 | NOT AUTHORIZED |
 
@@ -123,7 +127,7 @@ closeout is docs-only: PASS
 | Auth / login | NOT CHANGED |
 | Upload / detection main flow semantics | NOT CHANGED |
 | API contract | NOT CHANGED |
-| Stable tag | NOT CREATED |
+| Stable tag | `phase2b-batch4-step4-detail-readability-stable` |
 | Push | NOT DONE |
 | Step 5 | NOT AUTHORIZED / NOT ENTERED |
 
@@ -161,12 +165,14 @@ No backend field was required, renamed, deleted, or made mandatory by this step.
 ## 8. Stable Tag, Push, and Step 5 State
 
 ```text
-Step 4 stable tag: NOT CREATED
+Step 4 stable tag: phase2b-batch4-step4-detail-readability-stable
+tag commit: 66349abc9ba3f8ad4a31afe85d5430a52b0a4393
+master HEAD before archive: 66349ab
 push: NOT DONE
 Step 5: NOT AUTHORIZED
 ```
 
-No tag is created by this closeout task. No push is performed. Step 5 remains unauthorized and unentered.
+The stable tag was already created before this archive update. No new tag is created by this post-tag archive task. No push is performed. Step 5 remains unauthorized and unentered.
 
 ## 9. Rollback Plan
 
@@ -179,10 +185,35 @@ If rollback is required:
 ## 10. Final Closeout Decision
 
 ```text
-Phase 2B Batch4 Step 4: CLOSED / VERIFIED
+Phase 2B Batch4 Step 4: CLOSED / VERIFIED / TAGGED
 Reason: planning commit 2e0766e and GO Decision commit 2737622 authorized a frontend-only detail readability enhancement; frontend implementation commit 8fa5348 was merged by 62715a1; npm.cmd run build is PASS; git diff --check is PASS; master working tree was clean before docs closeout edits; the implementation is included in master; compatibility for missing detection_result, missing timing, legacy timing_ms, empty detections, old records, and detection_result.v1 is preserved; and forbidden scope remains unentered.
 
-Step 4 stable tag: NOT CREATED
+Step 4 stable tag: phase2b-batch4-step4-detail-readability-stable
+tag commit: 66349abc9ba3f8ad4a31afe85d5430a52b0a4393
+master HEAD before archive: 66349ab
 push: NOT DONE
 Step 5: NOT AUTHORIZED
 ```
+
+## Phase 2B Batch4 Step 4 Post-Tag Archive
+
+```text
+Step 4 stable tag: phase2b-batch4-step4-detail-readability-stable
+tag commit: 66349abc9ba3f8ad4a31afe85d5430a52b0a4393
+master HEAD before archive: 66349ab
+Step 4 status: CLOSED / VERIFIED / TAGGED
+push: NOT DONE
+Step 5: NOT AUTHORIZED
+```
+
+Implementation summary:
+
+- Detection record detail page readability enhancement.
+- Fixed timing Chinese label garbling.
+- Added file name display.
+- Added detection status `el-tag`.
+- Displayed timing information as an independent section.
+- Compatible with missing `detection_result`, missing timing, legacy `timing_ms`, empty detections, and old records.
+- Preserved JSON collapse, image display, API contract, and `detection_result.v1` semantics.
+
+This is a documentation-only post-tag archive. It records the already-created Step 4 stable tag and does not push, create a new tag, edit business code, or authorize Step 5 implementation.

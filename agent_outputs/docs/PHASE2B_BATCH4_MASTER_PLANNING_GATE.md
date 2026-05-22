@@ -287,3 +287,38 @@ agent_outputs/docs/PHASE2B_BATCH4_STEP4_DETAIL_READABILITY_CLOSEOUT.md
 ```
 
 This is a documentation-only closeout archive. It does not create a tag, does not push, and does not authorize Step 5.
+
+## Phase 2B Batch4 Step 4 Post-Tag Archive
+
+```text
+Step 4 stable tag: phase2b-batch4-step4-detail-readability-stable
+tag commit: 66349abc9ba3f8ad4a31afe85d5430a52b0a4393
+master HEAD before archive: 66349ab
+Step 4 status: CLOSED / VERIFIED / TAGGED
+push: NOT DONE
+Step 5: NOT AUTHORIZED
+```
+
+Implementation summary:
+
+- Detection record detail page readability enhancement.
+- Fixed timing Chinese label garbling.
+- Added file name display.
+- Added detection status `el-tag`.
+- Displayed timing information as an independent section.
+- Compatible with missing `detection_result`, missing timing, legacy `timing_ms`, empty detections, and old records.
+- Preserved JSON collapse, image display, API contract, and `detection_result.v1` semantics.
+
+This is a documentation-only post-tag archive. It records the already-created Step 4 stable tag and does not push, create a new tag, edit business code, or authorize Step 5 implementation.
+
+
+Post-tag state supersedes earlier Step 4 closeout lines that said the stable tag was not yet created:
+
+```text
+Step 4 stable tag: phase2b-batch4-step4-detail-readability-stable
+tag commit: 66349abc9ba3f8ad4a31afe85d5430a52b0a4393
+master HEAD before archive: 66349ab
+Step 4 status: CLOSED / VERIFIED / TAGGED
+push: NOT DONE
+Step 5: NOT AUTHORIZED
+```
