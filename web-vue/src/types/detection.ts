@@ -45,7 +45,7 @@ export interface DetectionArtifacts {
   [key: string]: unknown
 }
 
-export type DetectionStatus = 'detected' | 'no_detection' | 'failed' | string
+export type DetectionStatus = 'detected' | 'no_detection' | 'unknown' | 'failed' | string
 
 export interface DetectionResult {
   schema_version?: string
@@ -132,4 +132,45 @@ export interface PageResult<T> {
 export interface DetectionRecordQuery {
   page?: number
   page_size?: number
+}
+
+export interface DashboardStatusStats {
+  detected?: number
+  no_detection?: number
+  unknown?: number
+  [status: string]: number | undefined
+}
+
+export interface DashboardRecentRecord {
+  id?: string
+  record_id?: string
+  title?: string
+  filename?: string
+  original_filename?: string
+  model_id?: string
+  model_name?: string
+  status?: string
+  detection_status?: DetectionStatus
+  create_time?: string
+  created_at?: string
+  updated_at?: string
+  detection_result?: DetectionResult
+  target_count?: number
+  average_confidence?: number | null
+}
+
+export interface DashboardSummary {
+  total_records?: number
+  total_detections?: number
+  total_targets?: number
+  avg_confidence?: number | null
+  average_confidence?: number | null
+  detected_records?: number
+  no_detection_records?: number
+  unknown_records?: number
+  latest_detection_time?: string | null
+  recent_detection_time?: string | null
+  status_stats?: DashboardStatusStats
+  status_counts?: DashboardStatusStats
+  recent_records?: DashboardRecentRecord[]
 }

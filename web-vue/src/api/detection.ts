@@ -1,5 +1,11 @@
 import { request, requestBlob } from './request'
-import type { DetectionRecord, DetectionRecordQuery, ImageDetectionResponse, PageResult } from '../types/detection'
+import type {
+  DashboardSummary,
+  DetectionRecord,
+  DetectionRecordQuery,
+  ImageDetectionResponse,
+  PageResult,
+} from '../types/detection'
 
 export interface DetectImageOptions {
   image: File
@@ -46,4 +52,8 @@ export function fetchDetectionRecord(id: string) {
 
 export function exportDetectionRecordWordReport(id: string) {
   return requestBlob(`/api/detection/records/${encodeURIComponent(id)}/report.docx`)
+}
+
+export function fetchDashboardSummary() {
+  return request<DashboardSummary>('/api/detection/dashboard/summary')
 }

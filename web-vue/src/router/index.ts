@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import AppLayout from '../components/AppLayout.vue'
 import Login from '../views/Login.vue'
+import Dashboard from '../views/Dashboard.vue'
 import ImageDetect from '../views/ImageDetect.vue'
 import DetectionRecords from '../views/DetectionRecords.vue'
 import DetectionRecordDetail from '../views/DetectionRecordDetail.vue'
@@ -10,12 +11,13 @@ import PhaseDeferred from '../views/PhaseDeferred.vue'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/', redirect: '/detect/image' },
+    { path: '/', redirect: '/dashboard' },
     { path: '/login', component: Login, meta: { public: true } },
     {
       path: '/',
       component: AppLayout,
       children: [
+        { path: 'dashboard', component: Dashboard },
         { path: 'detect/image', component: ImageDetect },
         { path: 'records/detection', component: DetectionRecords },
         { path: 'records/detection/:id', component: DetectionRecordDetail, props: true },
@@ -24,7 +26,7 @@ const router = createRouter({
         { path: 'reports', component: PhaseDeferred, meta: { title: 'Word 报告' } },
       ],
     },
-    { path: '/:pathMatch(.*)*', redirect: '/detect/image' },
+    { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
   ],
 })
 
@@ -37,7 +39,7 @@ router.beforeEach(async (to) => {
     return { path: '/login', query: { redirect: to.fullPath } }
   }
   if (to.path === '/login' && user.isAuthenticated) {
-    return { path: '/detect/image' }
+    return { path: '/dashboard' }
   }
   return true
 })
