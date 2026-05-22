@@ -133,3 +133,37 @@ export interface DetectionRecordQuery {
   page?: number
   page_size?: number
 }
+
+export interface DashboardStatusStats {
+  detected?: number
+  no_detection?: number
+  unknown?: number
+  [status: string]: number | undefined
+}
+
+export interface DashboardRecentRecord {
+  id?: string
+  title?: string
+  filename?: string
+  model_id?: string
+  model_name?: string
+  status?: string
+  create_time?: string
+  created_at?: string
+  updated_at?: string
+  detection_result?: DetectionResult
+  target_count?: number
+}
+
+export interface DashboardSummary {
+  total_records?: number
+  total_detections?: number
+  total_targets?: number
+  avg_confidence?: number | null
+  average_confidence?: number | null
+  latest_detection_time?: string | null
+  recent_detection_time?: string | null
+  status_stats?: DashboardStatusStats
+  status_counts?: DashboardStatusStats
+  recent_records?: DashboardRecentRecord[]
+}

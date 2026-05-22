@@ -6,6 +6,7 @@
         <span>Phase 2B 最小版</span>
       </div>
       <el-menu router :default-active="$route.path" background-color="#0f172a" text-color="#cbd5e1" active-text-color="#60a5fa">
+        <el-menu-item index="/dashboard">Dashboard / 数据概览</el-menu-item>
         <el-menu-item index="/detect/image">图片检测</el-menu-item>
         <el-menu-item index="/records/detection">检测记录</el-menu-item>
         <el-menu-item index="/video">视频检测（暂不开放）</el-menu-item>
