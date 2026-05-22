@@ -1,6 +1,7 @@
 import json
 import time
 import uuid
+from pathlib import Path
 
 from ai.yolo_infer import InferenceUnavailable, build_detection_result, draw_result_image, image_metadata, run_yolo_image
 from services.file_storage_service import copy_result_image, file_info, resolve_object_path, save_upload
@@ -171,3 +172,168 @@ def get_record(db, user, record_id):
     else:
         row = db.execute("SELECT * FROM detection_records WHERE id=? AND user_id=?", (record_id, user["id"])).fetchone()
     return _record_to_dict(row) if row else None
+
+
+_DASHBOARD_SUMMARY_TARGET_KEYS = ("total_detections", "object_count", "target_count")
+_DETECTED_STATUSES = {"detected", "has_detection", "success"}
+_NO_DETECTION_STATUSES = {"no_detection", "none", "empty"}
+
+
+def _safe_json_dict(value):
+    if isinstance(value, dict):
+        return value
+    if not value:
+        return None
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return None
+        return parsed if isinstance(parsed, dict) else None
+    return None
+
+
+def _safe_list(value):
+    return value if isinstance(value, list) else []
+
+
+def _safe_int(value):
+    if isinstance(value, bool) or value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _safe_float(value):
+    if isinstance(value, bool) or value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _record_filename(row):
+    object_key = row["original_image_object_key"]
+    if not object_key:
+        return None
+    return Path(str(object_key).replace("\\", "/")).name
+
+
+def _dashboard_record_stats(row):
+    detection_result = _safe_json_dict(row["detection_result"])
+    if not detection_result:
+        return {
+            "target_count": 0,
+            "detection_status": "unknown",
+            "confidences": [],
+        }
+
+    summary = detection_result.get("summary") if isinstance(detection_result.get("summary"), dict) else {}
+    detections = _safe_list(detection_result.get("detections"))
+
+    target_count = None
+    for key in _DASHBOARD_SUMMARY_TARGET_KEYS:
+        target_count = _safe_int(summary.get(key))
+        if target_count is not None:
+            break
+    if target_count is None:
+        target_count = len(detections)
+
+    status = summary.get("detection_status")
+    if isinstance(status, str) and status:
+        normalized_status = status
+    elif summary.get("has_detections") is True or summary.get("has_detection") is True:
+        normalized_status = "detected"
+    elif summary.get("has_detections") is False or summary.get("has_detection") is False:
+        normalized_status = "no_detection"
+    else:
+        normalized_status = "detected" if target_count > 0 else "no_detection"
+
+    confidences = []
+    for detection in detections:
+        if not isinstance(detection, dict):
+            continue
+        confidence = _safe_float(detection.get("confidence"))
+        if confidence is not None:
+            confidences.append(confidence)
+
+    return {
+        "target_count": target_count,
+        "detection_status": normalized_status,
+        "confidences": confidences,
+    }
+
+
+def _dashboard_record_item(row, stats):
+    original_image = file_info(row["original_image_bucket"], row["original_image_object_key"])
+    filename = _record_filename(row)
+    item = {
+        "id": row["id"],
+        "record_id": row["id"],
+        "create_time": row["create_time"],
+        "model_id": row["model_id"],
+        "target_count": stats["target_count"],
+        "detection_status": stats["detection_status"],
+        "original_image": original_image,
+    }
+    if filename:
+        item["original_filename"] = filename
+    return item
+
+
+def dashboard_summary(db, user, recent_limit=5):
+    limit = max(1, min(10, int(recent_limit or 5)))
+    if int(user["role"]) == 1:
+        rows = db.execute("SELECT * FROM detection_records ORDER BY create_time DESC, id DESC").fetchall()
+    else:
+        rows = db.execute(
+            "SELECT * FROM detection_records WHERE user_id=? ORDER BY create_time DESC, id DESC",
+            (user["id"],),
+        ).fetchall()
+
+    total_targets = 0
+    detected_records = 0
+    no_detection_records = 0
+    unknown_records = 0
+    confidences = []
+    recent_records = []
+
+    for row in rows:
+        stats = _dashboard_record_stats(row)
+        total_targets += stats["target_count"]
+        confidences.extend(stats["confidences"])
+
+        status = str(stats["detection_status"] or "").lower()
+        if status in _DETECTED_STATUSES or (status not in _NO_DETECTION_STATUSES and stats["target_count"] > 0):
+            detected_records += 1
+        elif status in _NO_DETECTION_STATUSES or stats["target_count"] == 0:
+            no_detection_records += 1
+        else:
+            unknown_records += 1
+
+        if stats["detection_status"] == "unknown":
+            # Malformed or missing detection_result is a separate unknown bucket, not no-detection.
+            if no_detection_records > 0:
+                no_detection_records -= 1
+            unknown_records += 1
+
+        if len(recent_records) < limit:
+            recent_records.append(_dashboard_record_item(row, stats))
+
+    average_confidence = None
+    if confidences:
+        average_confidence = round(sum(confidences) / len(confidences), 6)
+
+    return {
+        "total_records": len(rows),
+        "total_targets": total_targets,
+        "average_confidence": average_confidence,
+        "detected_records": detected_records,
+        "no_detection_records": no_detection_records,
+        "unknown_records": unknown_records,
+        "latest_detection_time": rows[0]["create_time"] if rows else None,
+        "recent_records": recent_records,
+    }

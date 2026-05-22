@@ -4,7 +4,7 @@ from flask import Blueprint, g, request, send_file
 
 from ai.yolo_infer import InferenceUnavailable
 from db.init_db import get_db
-from services.detection_service import detect_image, get_record, list_records, save_record
+from services.detection_service import dashboard_summary, detect_image, get_record, list_records, save_record
 from services.file_storage_service import file_info
 from services.model_service import get_model
 from services.report_service import DOCX_MIMETYPE, build_detection_report_docx
@@ -60,6 +60,12 @@ def image_detection():
         )
     except ValueError as exc:
         return error_response(str(exc), code=400, data={"reason": "bad_request", "model_id": model_id}, http_status=400)
+
+
+@bp.route("/detection/dashboard/summary", methods=["GET"])
+@require_auth
+def dashboard_summary_api():
+    return success_response(dashboard_summary(get_db(), g.current_user))
 
 
 @bp.route("/detection/records", methods=["POST"])
