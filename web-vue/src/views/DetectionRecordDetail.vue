@@ -1,6 +1,16 @@
 ﻿<template>
   <div>
-    <el-page-header title="返回记录列表" content="检测记录详情" @back="$router.push('/records/detection')" />
+    <div class="detail-header">
+      <el-page-header title="返回记录列表" content="检测记录详情" @back="$router.push('/records/detection')" />
+      <el-button
+        v-if="record"
+        type="primary"
+        :loading="exportLoading"
+        @click="handleExportWordReport"
+      >
+        导出 Word 报告
+      </el-button>
+    </div>
     <el-alert v-if="error" :title="error" type="error" show-icon :closable="false" class="detail-alert" />
     <el-skeleton v-if="loading" :rows="8" animated class="detail-alert" />
     <template v-else-if="record">
@@ -106,9 +116,12 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import AuthImage from '../components/AuthImage.vue'
-import { fetchDetectionRecord } from '../api/detection'
+import { ApiClientError } from '../api/request'
+import { exportDetectionRecordWordReport, fetchDetectionRecord } from '../api/detection'
 import type { DetectionRecord } from '../types/detection'
+import { saveBlob } from '../utils/download'
 import { bboxText, percent, recordTime } from '../utils/format'
 import {
   backendReason,
@@ -125,6 +138,7 @@ type TagType = 'success' | 'info' | 'warning' | 'danger'
 
 const props = defineProps<{ id: string }>()
 const loading = ref(false)
+const exportLoading = ref(false)
 const error = ref('')
 const record = ref<DetectionRecord | null>(null)
 
@@ -162,9 +176,43 @@ async function loadRecord() {
     loading.value = false
   }
 }
+
+async function handleExportWordReport() {
+  if (!record.value) return
+
+  exportLoading.value = true
+  try {
+    const response = await exportDetectionRecordWordReport(record.value.id)
+    saveBlob(response.blob, response.filename || defaultReportFilename(record.value))
+    ElMessage.success('Word 报告下载已开始')
+  } catch (err) {
+    ElMessage.error(exportErrorMessage(err))
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+function defaultReportFilename(value: DetectionRecord): string {
+  return `detection-record-${value.id}-report.docx`
+}
+
+function exportErrorMessage(err: unknown): string {
+  if (err instanceof ApiClientError && err.status === 404) {
+    return '报告导出接口暂不可用或记录不存在'
+  }
+  return err instanceof Error ? err.message : 'Word 报告下载失败'
+}
 </script>
 
 <style scoped>
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .detail-alert,
 .detail-grid {
   margin-top: 18px;

@@ -1,7 +1,8 @@
-﻿import { ElMessage } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import router from '../router'
 import { clearToken, getToken } from '../stores/user'
 import type { ApiEnvelope } from '../types/api'
+import { parseContentDispositionFilename } from '../utils/download'
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 
@@ -29,14 +30,13 @@ export class ApiClientError extends Error {
   }
 }
 
-export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = getToken()
-  const headers = new Headers(init.headers)
+export interface BlobResponse {
+  blob: Blob
+  filename?: string
+}
 
-  if (token) headers.set('Authorization', `Bearer ${token}`)
-  if (!(init.body instanceof FormData) && init.body !== undefined && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json')
-  }
+export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const headers = buildAuthHeaders(init)
 
   let response: Response
   try {
@@ -72,10 +72,58 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
   return payload as T
 }
 
+export async function requestBlob(path: string, init: RequestInit = {}): Promise<BlobResponse> {
+  const headers = buildAuthHeaders(init)
+
+  let response: Response
+  try {
+    response = await fetch(resolveApiUrl(path), { ...init, headers })
+  } catch {
+    throw new ApiClientError('无法连接后端 Flask API，请确认 smoke 服务已启动。')
+  }
+
+  if (response.status === 401) {
+    const payload = await readErrorPayload(response)
+    clearToken()
+    ElMessage.error('登录已失效，请重新登录')
+    await router.replace({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } })
+    throw new ApiClientError(readableError(payload, '登录已失效'), 401, response.status, payload)
+  }
+
+  if (!response.ok) {
+    const payload = await readErrorPayload(response)
+    const envelope = isEnvelope<unknown>(payload) ? payload : undefined
+    throw new ApiClientError(readableError(payload, `请求失败：HTTP ${response.status}`), envelope?.code, response.status, payload)
+  }
+
+  const contentType = response.headers.get('Content-Type') || ''
+  if (contentType.toLowerCase().includes('application/json')) {
+    const payload = await response.json() as unknown
+    const envelope = isEnvelope<unknown>(payload) ? payload : undefined
+    throw new ApiClientError(readableError(payload, '接口返回失败'), envelope?.code, response.status, payload)
+  }
+
+  return {
+    blob: await response.blob(),
+    filename: parseContentDispositionFilename(response.headers.get('Content-Disposition')),
+  }
+}
+
 export function toJsonBody(value: unknown): BodyInit {
   return JSON.stringify(value)
 }
 
+function buildAuthHeaders(init: RequestInit): Headers {
+  const token = getToken()
+  const headers = new Headers(init.headers)
+
+  if (token) headers.set('Authorization', `Bearer ${token}`)
+  if (!(init.body instanceof FormData) && init.body !== undefined && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
+
+  return headers
+}
 
 function resolveApiUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) return path
@@ -83,6 +131,17 @@ function resolveApiUrl(path: string): string {
   if (!API_BASE_URL) return normalizedPath
   if (normalizedPath === API_BASE_URL || normalizedPath.startsWith(`${API_BASE_URL}/`)) return normalizedPath
   return `${API_BASE_URL}${normalizedPath}`
+}
+
+async function readErrorPayload(response: Response): Promise<unknown> {
+  const text = await response.text()
+  if (!text) return undefined
+
+  try {
+    return JSON.parse(text) as unknown
+  } catch {
+    return text.trim() || undefined
+  }
 }
 
 function safeJson<T>(text: string, status?: number): T {
@@ -99,6 +158,7 @@ function isEnvelope<T>(value: unknown): value is ApiEnvelope<T> {
 }
 
 function readableError(value: unknown, fallback: string): string {
+  if (typeof value === 'string') return value || fallback
   if (!value || typeof value !== 'object') return fallback
   const record = value as Record<string, unknown>
   const direct = firstString(record.message, record.msg)
