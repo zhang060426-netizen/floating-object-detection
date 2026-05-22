@@ -301,3 +301,39 @@ Implementation summary:
 - Preserved JSON collapse, image display, API contract, and `detection_result.v1` semantics.
 
 This is a documentation-only post-tag archive. It records the already-created Step 4 stable tag and does not push, create a new tag, edit business code, or authorize Step 5 implementation.
+
+## Phase 2B Batch4 Step 5 Word Report Closeout Archive (2026-05-22)
+
+```text
+Step 5 scope: Word Report Export MVP
+Step 5 status: CLOSED / VERIFIED / DOCS ARCHIVED
+master HEAD: ae596ef
+Backend merge commit: a24bd56
+Frontend merge commit: ae596ef
+Backend implementation commit: a916e4a
+Frontend implementation commit: 353b98a
+Step 5 Planning commit: fe214a8
+Step 5 Planning merge commit: cb1c4a9
+Step 5 GO Decision commit: 8286714
+latest stable baseline: phase2b-batch4-step4-detail-readability-stable -> 66349abc9ba3f8ad4a31afe85d5430a52b0a4393
+verification: compileall PASS; pytest PASS, 21 passed, 130 warnings; npm.cmd run build PASS; git diff --check PASS; git status clean before docs closeout
+Step 5 stable tag: NOT CREATED
+recommended stable tag: phase2b-batch4-step5-word-report-stable
+recommended tag target: after evidence merge, not yet created
+push: NOT DONE
+Step 6: NOT AUTHORIZED
+```
+
+Step 5 added a narrow single-record Word report export MVP:
+
+- backend `GET /api/detection/records/<record_id>/report.docx` with JWT auth, `get_record` permission reuse, `resolve_object_path` path-safety reuse, `python-docx>=1.1`, and `BytesIO` report generation with no persistent report file;
+- frontend detection record detail Word export button with `requestBlob()`, `exportDetectionRecordWordReport(id)`, `saveBlob()`, `Content-Disposition` filename parsing, `exportLoading`, and success / 404 / error handling.
+
+Step 5 explicitly did not change DB schema, Dockerfile / `docker-compose.yml`, runtime/storage structure, model / weights / training, `detection_result.v1` semantics, image detection main flow semantics, auth/login semantics, Dashboard, video detection, realtime detection, or Step 6.
+
+Formal evidence:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP5_WORD_REPORT_VERIFICATION_EVIDENCE.md
+agent_outputs/docs/PHASE2B_BATCH4_STEP5_WORD_REPORT_CLOSEOUT.md
+```

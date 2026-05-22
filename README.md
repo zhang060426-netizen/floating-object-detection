@@ -162,3 +162,32 @@ Implementation summary:
 - Preserved JSON collapse, image display, API contract, and `detection_result.v1` semantics.
 
 This is a documentation-only post-tag archive. It records the already-created Step 4 stable tag and does not push, create a new tag, edit business code, or authorize Step 5 implementation.
+
+## Phase 2B Batch4 Step 5 Word Report Closeout Archive (2026-05-22)
+
+```text
+Step 5 scope: Word Report Export MVP
+Step 5 status: CLOSED / VERIFIED / DOCS ARCHIVED
+master HEAD: ae596ef
+Backend merge commit: a24bd56
+Frontend merge commit: ae596ef
+Backend implementation commit: a916e4a
+Frontend implementation commit: 353b98a
+verification: compileall PASS; pytest PASS, 21 passed, 130 warnings; npm.cmd run build PASS; git diff --check PASS; git status clean before docs closeout
+Step 5 stable tag: NOT CREATED
+recommended stable tag: phase2b-batch4-step5-word-report-stable
+recommended tag target: after evidence merge, not yet created
+push: NOT DONE
+Step 6: NOT AUTHORIZED
+```
+
+Step 5 closed the narrow single-record Word Report Export MVP. Backend added `GET /api/detection/records/<record_id>/report.docx` with JWT / permission / path-safety reuse and in-memory `.docx` generation. Frontend added the detection-record-detail Word export button and authenticated blob download handling.
+
+Formal evidence:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP5_WORD_REPORT_VERIFICATION_EVIDENCE.md
+agent_outputs/docs/PHASE2B_BATCH4_STEP5_WORD_REPORT_CLOSEOUT.md
+```
+
+This archive does not push, does not create a tag, and does not authorize Step 6.

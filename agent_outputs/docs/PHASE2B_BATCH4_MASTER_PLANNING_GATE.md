@@ -322,3 +322,86 @@ Step 4 status: CLOSED / VERIFIED / TAGGED
 push: NOT DONE
 Step 5: NOT AUTHORIZED
 ```
+
+## Phase 2B Batch4 Step 5 Word Report Verification / Closeout Archive
+
+```text
+Step 5 scope: Word Report Export MVP
+Step 5 status: CLOSED / VERIFIED / DOCS ARCHIVED
+master HEAD: ae596ef
+Backend merge commit: a24bd56 Merge Phase 2B Batch4 Step5 backend word report export
+Frontend merge commit: ae596ef Merge Phase 2B Batch4 Step5 frontend word report download
+Backend implementation commit: a916e4a Implement Batch4 Step5 backend word report export
+Frontend implementation commit: 353b98a Implement Batch4 Step5 frontend word report download
+Step 5 Planning commit: fe214a8
+Step 5 Planning merge commit: cb1c4a9
+Step 5 GO Decision commit: 8286714
+latest stable baseline: phase2b-batch4-step4-detail-readability-stable -> 66349abc9ba3f8ad4a31afe85d5430a52b0a4393
+verification:
+  - git status: clean before docs closeout
+  - git diff --check HEAD~1..HEAD: PASS
+  - cd web-flask && python -m compileall .: PASS
+  - cd web-flask && python -m pytest: PASS, 21 passed, 130 warnings
+  - cd web-vue && npm.cmd run build: PASS
+  - git tag --points-at HEAD: empty
+backend implemented:
+  - GET /api/detection/records/<record_id>/report.docx
+  - JWT auth
+  - get_record permission reuse
+  - resolve_object_path path safety reuse
+  - python-docx>=1.1
+  - BytesIO no persistent report file
+  - no DB schema change
+  - no runtime/storage structure change
+frontend implemented:
+  - DetectionRecordDetail.vue export Word report button
+  - requestBlob()
+  - exportDetectionRecordWordReport(id)
+  - saveBlob()
+  - Content-Disposition filename parsing
+  - exportLoading
+  - success / 404 / error handling
+Step 5 stable tag: NOT CREATED
+recommended stable tag: phase2b-batch4-step5-word-report-stable
+recommended tag target: after evidence merge, not yet created
+push: NOT DONE
+Step 6: NOT AUTHORIZED
+```
+
+Closed implementation file scope:
+
+```text
+Backend:
+  - web-flask/requirements.txt
+  - web-flask/routes/detection.py
+  - web-flask/services/report_service.py
+  - web-flask/tests/test_report_export.py
+Frontend:
+  - web-vue/src/api/detection.ts
+  - web-vue/src/api/request.ts
+  - web-vue/src/utils/download.ts
+  - web-vue/src/views/DetectionRecordDetail.vue
+```
+
+Explicitly not changed by Step 5:
+
+- DB schema;
+- Dockerfile / `docker-compose.yml`;
+- runtime/storage structure;
+- model / weights / training;
+- `detection_result.v1` semantics;
+- image detection main flow semantics;
+- auth/login semantics;
+- Dashboard implementation;
+- video detection implementation;
+- realtime detection implementation;
+- Step 6 implementation.
+
+Closeout artifacts:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP5_WORD_REPORT_VERIFICATION_EVIDENCE.md
+agent_outputs/docs/PHASE2B_BATCH4_STEP5_WORD_REPORT_CLOSEOUT.md
+```
+
+This is a documentation-only evidence / closeout archive. It does not push, does not create a tag, does not edit business code, and does not authorize Step 6.
