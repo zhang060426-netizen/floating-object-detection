@@ -91,8 +91,8 @@
                   <el-button
                     type="primary"
                     link
-                    :disabled="!row.id"
-                    @click="$router.push(`/records/detection/${row.id}`)"
+                    :disabled="!recordDetailId(row)"
+                    @click="$router.push(`/records/detection/${recordDetailId(row)}`)"
                   >
                     详情
                   </el-button>
@@ -126,7 +126,7 @@ const error = ref('')
 const summary = ref<DashboardSummary | null>(null)
 
 const recentRecords = computed(() => summary.value?.recent_records ?? [])
-const statusStats = computed(() => summary.value?.status_stats ?? summary.value?.status_counts ?? {})
+const statusStats = computed(() => buildStatusStats(summary.value))
 const hasStatusStats = computed(() => statusItems.value.some((item) => item.count > 0))
 const hasLegacyRecords = computed(() => recentRecords.value.some((record) => !record.detection_result))
 const isEmptyDashboard = computed(() => (
@@ -177,31 +177,41 @@ async function loadSummary() {
 function normalizeSummary(value: DashboardSummary): DashboardSummary {
   return {
     ...value,
-    status_stats: normalizeStatusStats(value.status_stats ?? value.status_counts),
     recent_records: Array.isArray(value.recent_records) ? value.recent_records : [],
+  }
+}
+
+function buildStatusStats(value: DashboardSummary | null): DashboardStatusStats {
+  const fallbackStats = normalizeStatusStats(value?.status_stats ?? value?.status_counts)
+  return {
+    ...fallbackStats,
+    detected: safeNumber(value?.detected_records ?? fallbackStats.detected),
+    no_detection: safeNumber(value?.no_detection_records ?? fallbackStats.no_detection),
+    unknown: safeNumber(value?.unknown_records ?? fallbackStats.unknown),
   }
 }
 
 function normalizeStatusStats(value?: DashboardStatusStats): DashboardStatusStats {
   const stats = value ?? {}
-  return {
-    ...stats,
-    detected: safeNumber(stats.detected),
-    no_detection: safeNumber(stats.no_detection),
-    unknown: safeNumber(stats.unknown),
-  }
+  return Object.fromEntries(
+    Object.entries(stats).map(([status, count]) => [status, safeNumber(count)]),
+  ) as DashboardStatusStats
 }
 
 function recordFilename(record: DashboardRecentRecord): string {
-  return record.filename || record.detection_result?.image?.filename || record.title || '-'
+  return record.original_filename || record.filename || record.detection_result?.image?.filename || record.title || '-'
 }
 
 function recordStatus(record: DashboardRecentRecord): string {
-  return record.status || detectionStatus(record.detection_result)
+  return record.detection_status || record.status || detectionStatus(record.detection_result)
 }
 
 function recordStatusTagType(record: DashboardRecentRecord): TagType {
   return statusTagType(recordStatus(record))
+}
+
+function recordDetailId(record: DashboardRecentRecord): string {
+  return record.id || record.record_id || ''
 }
 
 function statusTagType(status: string): TagType {
