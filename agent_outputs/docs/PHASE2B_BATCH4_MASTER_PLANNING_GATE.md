@@ -454,3 +454,94 @@ Confirmed NOT changed:
 - realtime detection implementation.
 
 This is a documentation-only post-tag archive. It records the already-created Step 5 stable tag and does not push, create a new tag, edit business code, or authorize Step 6.
+
+## Phase 2B Batch4 Step 6 Dashboard Verification / Closeout Archive (2026-05-22)
+
+```text
+Step 6 scope: Dashboard 可视化增强 MVP
+Step 6 status: CLOSED / VERIFIED / DOCS ARCHIVED
+master HEAD: 9ac4644
+Backend merge commit: 3a9d462 Merge Phase 2B Batch4 Step6 backend dashboard summary
+Backend implementation commit: a05e09c Implement Batch4 Step6 backend dashboard summary
+Frontend merge commit: 9ac4644 Merge Phase 2B Batch4 Step6 frontend dashboard
+Frontend implementation commits:
+  - 251ade6 Implement Batch4 Step6 frontend dashboard
+  - 59bc851 Fix Batch4 Step6 dashboard API field mapping
+Step 6 Planning commit: e4a3820
+Step 6 GO Decision commit: ada8740
+latest stable baseline: phase2b-batch4-step5-word-report-stable -> 645f2dccb7f32963123c8d16fac9f6a8044f906d
+verification:
+  - git status: clean before docs closeout
+  - git diff --check HEAD~1..HEAD: PASS
+  - cd web-flask && python -m compileall .: PASS
+  - cd web-flask && python -m pytest: PASS, 26 passed, 152 warnings
+  - cd web-vue && npm.cmd run build: PASS
+  - git tag --points-at HEAD: empty
+backend implemented:
+  - GET /api/detection/dashboard/summary
+  - JWT auth
+  - admin sees all records
+  - normal user sees own records only
+  - no DB schema change
+  - compatible with missing/malformed detection_result
+  - compatible with empty detections
+  - compatible with missing confidence
+  - compatible with old records missing summary
+  - compatible with result_image missing
+  - recent_records limit: default 5, max 10
+frontend implemented:
+  - Dashboard.vue
+  - /dashboard route
+  - / redirect to /dashboard
+  - AppLayout Dashboard / 数据概览 menu entry
+  - fetchDashboardSummary()
+  - DashboardSummary / DashboardRecentRecord types
+  - summary cards
+  - detected / no_detection / unknown status stats
+  - recent records table
+  - loading / error / empty state
+  - API field mapping fix for detected_records / no_detection_records / unknown_records / original_filename / detection_status
+Step 6 stable tag: NOT CREATED
+recommended stable tag: phase2b-batch4-step6-dashboard-stable
+recommended tag target: after evidence merge, not yet created
+push: NOT DONE
+Step 7: NOT AUTHORIZED
+```
+
+Closed implementation file scope:
+
+```text
+Backend:
+  - web-flask/routes/detection.py
+  - web-flask/services/detection_service.py
+  - web-flask/tests/test_dashboard_summary.py
+Frontend:
+  - web-vue/src/views/Dashboard.vue
+  - web-vue/src/router/index.ts
+  - web-vue/src/components/AppLayout.vue
+  - web-vue/src/api/detection.ts
+  - web-vue/src/types/detection.ts
+```
+
+Explicitly not changed by Step 6:
+
+- DB schema;
+- Dockerfile / `docker-compose.yml`;
+- runtime/storage structure;
+- model / weights / class / training;
+- `detection_result.v1` semantics;
+- image detection main flow semantics;
+- auth/login semantics;
+- video detection implementation;
+- realtime detection implementation;
+- AI Agent / LLM feature;
+- Step 7 implementation.
+
+Closeout artifacts:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP6_DASHBOARD_VERIFICATION_EVIDENCE.md
+agent_outputs/docs/PHASE2B_BATCH4_STEP6_DASHBOARD_CLOSEOUT.md
+```
+
+This is a documentation-only evidence / closeout archive. It does not push, does not create a tag, does not edit business code, and does not authorize Step 7.
