@@ -345,3 +345,53 @@ Step 5 stable tag: NOT CREATED
 push: NOT DONE
 Step 6: NOT AUTHORIZED
 ```
+
+## 17. Post-Tag Archive Update
+
+```text
+Step 5 status: CLOSED / VERIFIED / TAGGED
+Step 5 stable tag: phase2b-batch4-step5-word-report-stable
+tag target: 645f2dccb7f32963123c8d16fac9f6a8044f906d
+master HEAD before archive: 645f2dc
+push: NOT DONE
+Step 6: NOT AUTHORIZED
+```
+
+This post-tag archive update records the completed Step 5 outcome after the earlier GO Decision. It does not change the original GO Decision constraints; it records that the authorized Word Report Export MVP was implemented, verified, merged, and tagged.
+
+Tagged implementation summary:
+
+- Backend Word report API: `GET /api/detection/records/<record_id>/report.docx`.
+- JWT auth.
+- Permission reuse via `get_record`.
+- `resolve_object_path` path safety.
+- `python-docx>=1.1`.
+- `BytesIO` no persistent report file.
+- Frontend `DetectionRecordDetail.vue` ??? Word ?????.
+- `requestBlob()`.
+- `exportDetectionRecordWordReport(id)`.
+- `saveBlob()`.
+- `Content-Disposition` filename parsing.
+
+Tagged verification summary:
+
+- backend compileall PASS.
+- pytest PASS, 21 passed, 130 warnings.
+- frontend npm build PASS.
+- git diff --check PASS.
+- working tree clean.
+
+Confirmed NOT changed:
+
+- DB schema.
+- Dockerfile / `docker-compose.yml`.
+- runtime/storage structure.
+- model / weights / class / training.
+- `detection_result.v1` semantics.
+- image detection main flow semantics.
+- auth/login semantics.
+- Dashboard implementation.
+- video detection implementation.
+- realtime detection implementation.
+
+Push remains NOT DONE. Step 6 remains NOT AUTHORIZED.

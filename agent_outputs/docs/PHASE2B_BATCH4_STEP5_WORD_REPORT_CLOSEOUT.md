@@ -218,3 +218,51 @@ Recommended tag target: after evidence merge, not yet created
 push: NOT DONE
 Step 6: NOT AUTHORIZED
 ```
+
+## 11. Post-Tag Archive State
+
+```text
+Step 5 status: CLOSED / VERIFIED / TAGGED
+Step 5 stable tag: phase2b-batch4-step5-word-report-stable
+tag target: 645f2dccb7f32963123c8d16fac9f6a8044f906d
+master HEAD before archive: 645f2dc
+push: NOT DONE
+Step 6: NOT AUTHORIZED
+```
+
+Post-tag implementation summary:
+
+- Backend Word report API: `GET /api/detection/records/<record_id>/report.docx`.
+- JWT auth.
+- Permission reuse via `get_record`.
+- `resolve_object_path` path safety.
+- `python-docx>=1.1`.
+- `BytesIO` no persistent report file.
+- Frontend `DetectionRecordDetail.vue` ??? Word ?????.
+- `requestBlob()`.
+- `exportDetectionRecordWordReport(id)`.
+- `saveBlob()`.
+- `Content-Disposition` filename parsing.
+
+Post-tag verification:
+
+- backend compileall PASS.
+- pytest PASS, 21 passed, 130 warnings.
+- frontend npm build PASS.
+- git diff --check PASS.
+- working tree clean.
+
+Post-tag boundary confirmation:
+
+- DB schema: NOT CHANGED.
+- Dockerfile / `docker-compose.yml`: NOT CHANGED.
+- runtime/storage structure: NOT CHANGED.
+- model / weights / class / training: NOT CHANGED.
+- `detection_result.v1` semantics: NOT CHANGED.
+- image detection main flow semantics: NOT CHANGED.
+- auth/login semantics: NOT CHANGED.
+- Dashboard implementation: NOT ENTERED.
+- video detection implementation: NOT ENTERED.
+- realtime detection implementation: NOT ENTERED.
+
+This post-tag archive records that the stable tag has been created. It does not push, create a new tag, modify business code, or authorize Step 6.

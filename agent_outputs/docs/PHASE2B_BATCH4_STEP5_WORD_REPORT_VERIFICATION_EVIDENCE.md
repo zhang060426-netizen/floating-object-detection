@@ -194,3 +194,53 @@ Rollback is narrow and reversible:
 Phase 2B Batch4 Step 5 Word Report Export MVP: VERIFIED / DOCS ARCHIVED
 Reason: backend endpoint and frontend download action are merged into master; compileall passed; pytest passed with 21 passed and 130 warnings; frontend build passed; diff check passed; status was recorded clean before docs closeout; forbidden scope remains unentered; push is not done; Step 5 stable tag is not created yet; Step 6 is not authorized.
 ```
+
+## 11. Post-Tag Evidence Update
+
+```text
+Step 5 status: CLOSED / VERIFIED / TAGGED
+Step 5 stable tag: phase2b-batch4-step5-word-report-stable
+tag target: 645f2dccb7f32963123c8d16fac9f6a8044f906d
+master HEAD before archive: 645f2dc
+push: NOT DONE
+Step 6: NOT AUTHORIZED
+```
+
+The Step 5 stable tag has now been created at the evidence merge commit. This updates the earlier pre-tag evidence state that recorded the tag as not yet created.
+
+Implementation summary retained for the tagged state:
+
+- Backend Word report API: `GET /api/detection/records/<record_id>/report.docx`.
+- JWT auth.
+- Permission reuse via `get_record`.
+- `resolve_object_path` path safety.
+- `python-docx>=1.1`.
+- `BytesIO` no persistent report file.
+- Frontend `DetectionRecordDetail.vue` ??? Word ?????.
+- `requestBlob()`.
+- `exportDetectionRecordWordReport(id)`.
+- `saveBlob()`.
+- `Content-Disposition` filename parsing.
+
+Verification retained for the tagged state:
+
+- backend compileall PASS.
+- pytest PASS, 21 passed, 130 warnings.
+- frontend npm build PASS.
+- git diff --check PASS.
+- working tree clean.
+
+Confirmed NOT changed for the tagged state:
+
+- DB schema.
+- Dockerfile / `docker-compose.yml`.
+- runtime/storage structure.
+- model / weights / class / training.
+- `detection_result.v1` semantics.
+- image detection main flow semantics.
+- auth/login semantics.
+- Dashboard implementation.
+- video detection implementation.
+- realtime detection implementation.
+
+No push was performed. Step 6 remains explicitly unauthorized.

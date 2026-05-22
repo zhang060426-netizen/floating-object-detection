@@ -405,3 +405,52 @@ agent_outputs/docs/PHASE2B_BATCH4_STEP5_WORD_REPORT_CLOSEOUT.md
 ```
 
 This is a documentation-only evidence / closeout archive. It does not push, does not create a tag, does not edit business code, and does not authorize Step 6.
+
+## Phase 2B Batch4 Step 5 Post-Tag Archive (2026-05-22)
+
+```text
+Step 5 scope: Word Report Export MVP
+Step 5 status: CLOSED / VERIFIED / TAGGED
+Step 5 stable tag: phase2b-batch4-step5-word-report-stable
+tag target: 645f2dccb7f32963123c8d16fac9f6a8044f906d
+master HEAD before archive: 645f2dc
+push: NOT DONE
+Step 6: NOT AUTHORIZED
+```
+
+Implementation summary:
+
+- Backend Word report API: `GET /api/detection/records/<record_id>/report.docx`.
+- JWT auth.
+- Permission reuse via `get_record`.
+- `resolve_object_path` path safety.
+- `python-docx>=1.1`.
+- `BytesIO` no persistent report file.
+- Frontend `DetectionRecordDetail.vue` ??? Word ?????.
+- `requestBlob()`.
+- `exportDetectionRecordWordReport(id)`.
+- `saveBlob()`.
+- `Content-Disposition` filename parsing.
+
+Verification:
+
+- backend compileall PASS.
+- pytest PASS, 21 passed, 130 warnings.
+- frontend npm build PASS.
+- git diff --check PASS.
+- working tree clean.
+
+Confirmed NOT changed:
+
+- DB schema.
+- Dockerfile / `docker-compose.yml`.
+- runtime/storage structure.
+- model / weights / class / training.
+- `detection_result.v1` semantics.
+- image detection main flow semantics.
+- auth/login semantics.
+- Dashboard implementation.
+- video detection implementation.
+- realtime detection implementation.
+
+This is a documentation-only post-tag archive. It records the already-created Step 5 stable tag and does not push, create a new tag, edit business code, or authorize Step 6.
