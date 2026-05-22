@@ -386,3 +386,37 @@ Confirmed NOT changed:
 - realtime detection implementation.
 
 This is a documentation-only post-tag archive. It records the already-created Step 5 stable tag and does not push, create a new tag, edit business code, or authorize Step 6.
+
+## Phase 2B Batch4 Step 6 Dashboard Closeout Archive (2026-05-22)
+
+```text
+Step 6 scope: Dashboard 可视化增强 MVP
+Step 6 status: CLOSED / VERIFIED / DOCS ARCHIVED
+master HEAD: 9ac4644
+Backend merge commit: 3a9d462
+Backend implementation commit: a05e09c
+Frontend merge commit: 9ac4644
+Frontend implementation commits: 251ade6, 59bc851
+Step 6 Planning commit: e4a3820
+Step 6 GO Decision commit: ada8740
+latest stable baseline: phase2b-batch4-step5-word-report-stable -> 645f2dccb7f32963123c8d16fac9f6a8044f906d
+verification: compileall PASS; pytest PASS, 26 passed, 152 warnings; npm.cmd run build PASS; git diff --check PASS; git status clean before docs closeout
+Step 6 stable tag: NOT CREATED
+recommended stable tag: phase2b-batch4-step6-dashboard-stable
+recommended tag target: after evidence merge, not yet created
+push: NOT DONE
+Step 7: NOT AUTHORIZED
+```
+
+Step 6 closed the Dashboard visualization enhancement MVP. Backend added `GET /api/detection/dashboard/summary` with JWT auth, admin/all-record and normal-user/own-record visibility, no schema change, compatibility with malformed or missing `detection_result`, empty detections, missing confidence, old records missing summary, missing result image, and bounded recent records (default 5, max 10). Frontend added `Dashboard.vue`, `/dashboard`, `/` redirect, `AppLayout` Dashboard / 数据概览 menu entry, `fetchDashboardSummary()`, dashboard summary types, summary cards, status stats, recent records table, loading/error/empty states, and the API field mapping fix for `detected_records`, `no_detection_records`, `unknown_records`, `original_filename`, and `detection_status`.
+
+Formal evidence:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP6_DASHBOARD_VERIFICATION_EVIDENCE.md
+agent_outputs/docs/PHASE2B_BATCH4_STEP6_DASHBOARD_CLOSEOUT.md
+```
+
+Step 6 explicitly did not change DB schema, Dockerfile / `docker-compose.yml`, runtime/storage structure, model / weights / class / training, `detection_result.v1` semantics, image detection main flow semantics, auth/login semantics, video detection, realtime detection, AI Agent / LLM features, or Step 7.
+
+This archive does not push, does not create a tag, and does not authorize Step 7.
