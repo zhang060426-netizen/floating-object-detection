@@ -1,10 +1,13 @@
-﻿from flask import Blueprint, g, request
+﻿import inspect
+
+from flask import Blueprint, g, request, send_file
 
 from ai.yolo_infer import InferenceUnavailable
 from db.init_db import get_db
 from services.detection_service import detect_image, get_record, list_records, save_record
 from services.file_storage_service import file_info
 from services.model_service import get_model
+from services.report_service import DOCX_MIMETYPE, build_detection_report_docx
 from utils.jwt_utils import require_auth
 from utils.response import error_response, success_response
 
@@ -98,6 +101,25 @@ def records():
     except ValueError:
         return error_response("page and page_size must be integers", code=400)
     return success_response(list_records(get_db(), g.current_user, page, page_size))
+
+
+@bp.route("/detection/records/<record_id>/report.docx", methods=["GET"])
+@require_auth
+def record_report_docx(record_id):
+    record = get_record(get_db(), g.current_user, record_id)
+    if not record:
+        return error_response("record not found", code=404, http_status=404)
+    report = build_detection_report_docx(record)
+    filename = f"detection-report-{record_id}.docx"
+    send_file_kwargs = {"mimetype": DOCX_MIMETYPE, "as_attachment": True}
+    if "download_name" in inspect.signature(send_file).parameters:
+        send_file_kwargs["download_name"] = filename
+    else:
+        send_file_kwargs["attachment_filename"] = filename
+    response = send_file(report, **send_file_kwargs)
+    response.headers["Content-Type"] = DOCX_MIMETYPE
+    response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 @bp.route("/detection/records/<record_id>", methods=["GET"])

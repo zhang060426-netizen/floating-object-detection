@@ -4,3 +4,4 @@ Pillow>=9.0
 pytest>=7.0
 # Optional for real inference; absence returns a diagnostic error, not fake success.
 ultralytics>=8.0
+python-docx>=1.1
