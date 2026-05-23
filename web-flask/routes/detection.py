@@ -1,5 +1,7 @@
 ﻿import inspect
 
+from datetime import date, datetime, time
+
 from flask import Blueprint, g, request, send_file
 
 from ai.yolo_infer import InferenceUnavailable
@@ -12,6 +14,7 @@ from utils.jwt_utils import require_auth
 from utils.response import error_response, success_response
 
 bp = Blueprint("detection", __name__)
+_DETECTION_RECORD_STATUSES = {"detected", "no_detection", "unknown"}
 
 
 def parse_bool(value, default=True):
@@ -32,6 +35,28 @@ def parse_confidence(value, default=0.5):
     if confidence < 0 or confidence > 1:
         raise ValueError("confidence_threshold must be between 0 and 1")
     return confidence
+
+
+def parse_record_date(value, field, end_of_day=False):
+    if value is None or not str(value).strip():
+        return None
+    text = str(value).strip()
+    try:
+        if len(text) == 10:
+            parsed = datetime.combine(date.fromisoformat(text), time.max if end_of_day else time.min)
+        else:
+            parsed = datetime.fromisoformat(text)
+            if parsed.tzinfo is not None:
+                raise ValueError
+    except ValueError as exc:
+        raise ValueError(f"{field} must be a valid ISO date or datetime") from exc
+    return parsed
+
+
+def format_record_date(value):
+    if value is None:
+        return None
+    return value.strftime("%Y-%m-%d %H:%M:%S.%f").rstrip("0").rstrip(".")
 
 
 @bp.route("/detection/image", methods=["POST"])
@@ -106,7 +131,32 @@ def records():
         page_size = min(100, max(1, int(request.args.get("page_size", 20))))
     except ValueError:
         return error_response("page and page_size must be integers", code=400)
-    return success_response(list_records(get_db(), g.current_user, page, page_size))
+
+    detection_status = (request.args.get("detection_status") or "").strip() or None
+    if detection_status and detection_status not in _DETECTION_RECORD_STATUSES:
+        return error_response("detection_status must be detected, no_detection, or unknown", code=400)
+
+    try:
+        date_start = parse_record_date(request.args.get("date_start"), "date_start")
+        date_end = parse_record_date(request.args.get("date_end"), "date_end", end_of_day=True)
+    except ValueError as exc:
+        return error_response(str(exc), code=400)
+    if date_start and date_end and date_start > date_end:
+        return error_response("date_start must not be later than date_end", code=400)
+
+    return success_response(
+        list_records(
+            get_db(),
+            g.current_user,
+            page,
+            page_size,
+            keyword=(request.args.get("keyword") or "").strip() or None,
+            model_id=(request.args.get("model_id") or "").strip() or None,
+            detection_status=detection_status,
+            date_start=format_record_date(date_start),
+            date_end=format_record_date(date_end),
+        )
+    )
 
 
 @bp.route("/detection/records/<record_id>/report.docx", methods=["GET"])
