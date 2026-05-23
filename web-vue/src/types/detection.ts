@@ -132,6 +132,11 @@ export interface PageResult<T> {
 export interface DetectionRecordQuery {
   page?: number
   page_size?: number
+  keyword?: string
+  model_id?: string
+  detection_status?: string
+  date_start?: string
+  date_end?: string
 }
 
 export interface DashboardStatusStats {

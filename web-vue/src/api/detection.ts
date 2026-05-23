@@ -37,12 +37,23 @@ function withQuery(path: string, params?: DetectionRecordQuery): string {
   const query = new URLSearchParams()
   appendPositiveInteger(query, 'page', params.page)
   appendPositiveInteger(query, 'page_size', params.page_size)
+  appendNonEmptyString(query, 'keyword', params.keyword)
+  appendNonEmptyString(query, 'model_id', params.model_id)
+  appendNonEmptyString(query, 'detection_status', params.detection_status)
+  appendNonEmptyString(query, 'date_start', params.date_start)
+  appendNonEmptyString(query, 'date_end', params.date_end)
   return query.size > 0 ? `${path}?${query.toString()}` : path
 }
 
 function appendPositiveInteger(query: URLSearchParams, key: string, value?: number): void {
   if (typeof value === 'number' && Number.isInteger(value) && value > 0) {
     query.set(key, String(value))
+  }
+}
+
+function appendNonEmptyString(query: URLSearchParams, key: string, value?: string): void {
+  if (typeof value === 'string' && value.trim()) {
+    query.set(key, value.trim())
   }
 }
 

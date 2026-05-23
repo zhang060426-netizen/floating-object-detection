@@ -9,6 +9,45 @@
         <el-button type="primary" plain :loading="loading" @click="loadRecords">刷新</el-button>
       </div>
     </template>
+    <el-form class="filter-form" :inline="true" @submit.prevent="handleSearch">
+      <el-form-item>
+        <el-input
+          v-model="filters.keyword"
+          clearable
+          placeholder="文件名关键字"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-input
+          v-model="filters.model_id"
+          clearable
+          placeholder="模型 ID"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-select v-model="filters.detection_status" clearable placeholder="状态" class="status-select">
+          <el-option label="detected" value="detected" />
+          <el-option label="no_detection" value="no_detection" />
+          <el-option label="unknown" value="unknown" />
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-date-picker
+          v-model="filters.dateRange"
+          type="daterange"
+          unlink-panels
+          value-format="YYYY-MM-DD"
+          format="YYYY-MM-DD"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          range-separator="至"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" native-type="submit" :loading="loading">查询</el-button>
+        <el-button :disabled="loading" @click="handleReset">重置</el-button>
+      </el-form-item>
+    </el-form>
     <el-alert
       v-if="error"
       :title="error"
@@ -60,13 +99,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { fetchDetectionRecords } from '../api/detection'
-import type { DetectionRecord, PageResult } from '../types/detection'
+import type { DetectionRecord, DetectionRecordQuery, PageResult } from '../types/detection'
 import { recordTime } from '../utils/format'
 import { detectionCount, detectionStatus, modelDisplayName } from '../utils/detectionDisplay'
 
 type TagType = 'success' | 'info' | 'warning' | 'danger'
+type AppliedFilters = Pick<
+  DetectionRecordQuery,
+  'keyword' | 'model_id' | 'detection_status' | 'date_start' | 'date_end'
+>
+
+interface FilterForm {
+  keyword: string
+  model_id: string
+  detection_status: string
+  dateRange: string[] | null
+}
 
 const DEFAULT_PAGE_SIZE = 10
 const pageSizes = [10, 20, 50]
@@ -78,6 +128,13 @@ const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(DEFAULT_PAGE_SIZE)
 const serverPagination = ref(false)
+const filters = reactive<FilterForm>({
+  keyword: '',
+  model_id: '',
+  detection_status: '',
+  dateRange: null,
+})
+const appliedFilters = ref<AppliedFilters>({})
 
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
 const pagedRecords = computed(() => {
@@ -92,10 +149,18 @@ async function loadRecords() {
   loading.value = true
   error.value = ''
   try {
-    const data = await fetchDetectionRecords({ page: currentPage.value, page_size: pageSize.value })
+    const data = await fetchDetectionRecords({
+      page: currentPage.value,
+      page_size: pageSize.value,
+      ...appliedFilters.value,
+    })
     applyRecordResponse(data)
   } catch (err) {
-    await loadRecordsWithoutPaging(err)
+    if (hasAppliedFilters()) {
+      applyLoadError(err)
+    } else {
+      await loadRecordsWithoutPaging(err)
+    }
   } finally {
     loading.value = false
   }
@@ -106,11 +171,15 @@ async function loadRecordsWithoutPaging(firstError: unknown) {
     const data = await fetchDetectionRecords()
     applyRecordResponse(data)
   } catch {
-    error.value = firstError instanceof Error ? firstError.message : '????????'
-    records.value = []
-    total.value = 0
-    serverPagination.value = false
+    applyLoadError(firstError)
   }
+}
+
+function applyLoadError(err: unknown) {
+  error.value = err instanceof Error ? err.message : '加载检测记录失败'
+  records.value = []
+  total.value = 0
+  serverPagination.value = false
 }
 
 function applyRecordResponse(data: PageResult<DetectionRecord> | DetectionRecord[]) {
@@ -133,6 +202,37 @@ function applyRecordResponse(data: PageResult<DetectionRecord> | DetectionRecord
     pageSize.value = positiveInteger(data.page_size ?? data.pageSize, pageSize.value)
   }
   clampCurrentPage()
+}
+
+function handleSearch() {
+  appliedFilters.value = buildAppliedFilters()
+  currentPage.value = 1
+  loadRecords()
+}
+
+function handleReset() {
+  filters.keyword = ''
+  filters.model_id = ''
+  filters.detection_status = ''
+  filters.dateRange = null
+  appliedFilters.value = {}
+  currentPage.value = 1
+  loadRecords()
+}
+
+function buildAppliedFilters(): AppliedFilters {
+  const [date_start, date_end] = filters.dateRange ?? []
+  return {
+    keyword: filters.keyword.trim() || undefined,
+    model_id: filters.model_id.trim() || undefined,
+    detection_status: filters.detection_status || undefined,
+    date_start,
+    date_end,
+  }
+}
+
+function hasAppliedFilters(): boolean {
+  return Object.values(appliedFilters.value).some(Boolean)
 }
 
 function normalizePage(data: PageResult<DetectionRecord>): DetectionRecord[] {
@@ -185,6 +285,22 @@ function statusTagType(record: DetectionRecord): TagType {
 
 .record-alert {
   margin-bottom: 14px;
+}
+
+.filter-form {
+  margin-bottom: 4px;
+}
+
+.filter-form :deep(.el-form-item) {
+  margin-bottom: 14px;
+}
+
+.filter-form :deep(.el-input) {
+  width: 180px;
+}
+
+.status-select {
+  width: 150px;
 }
 
 .record-summary {
