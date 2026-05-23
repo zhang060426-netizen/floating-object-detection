@@ -213,3 +213,24 @@ git diff --check result:
 Rollback reference: phase2b-batch4-step6-dashboard-stable -> 708a61a
 Remaining risks:
 ```
+
+## 9. Post-Tag Archival Status Addendum
+
+This retained planning draft originally recorded the pre-implementation and pre-tag gate states. Formal verification and tag creation subsequently completed; the following post-tag state supersedes only those historical tag-state lines.
+
+```text
+Step 7 stable tag: CREATED
+stable tag: phase2b-batch4-step7-record-filter-stable -> 25c9f43
+tag commit: 25c9f43 Merge Phase 2B Batch4 Step7 record filter verification evidence
+earlier recommended tag target: 224e12d (historical recommendation only)
+actual stable tag target: 25c9f43
+final verification before tag: PASS; backend compileall PASS; backend pytest PASS, 48 passed, 263 warnings; frontend npm.cmd run build PASS; git diff --check PASS; master clean
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond tag commit after commit
+new tag created by this archive update: NO
+business code modified after tag: NO
+push: NOT DONE
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+Step 8: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 8 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```

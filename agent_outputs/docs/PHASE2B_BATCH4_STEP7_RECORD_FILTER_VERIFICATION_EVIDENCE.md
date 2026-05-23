@@ -212,3 +212,29 @@ If Step 7 implementation rollback is required:
 Phase 2B Batch4 Step 7 Detection Records Filter/Search Enhancement: VERIFIED / DOCS ARCHIVED
 Reason: backend and frontend record-filter changes are merged at implementation HEAD 224e12d; JWT and existing user/admin visibility are preserved; pagination response shape is preserved; five optional filters and frontend applied-filter interactions are implemented; compatibility paths for legacy and malformed detection results remain covered; unified backend/frontend/diff verification passed; forbidden scope remains unentered; push is not done; tag is not created; Step 8 is not authorized.
 ```
+
+## 9. Post-Tag Evidence Addendum
+
+This addendum records the completed stable-tag action after the evidence merge. It supersedes only the earlier `tag is not created` state; all implementation and verification evidence remains unchanged.
+
+```text
+Step 7 stable tag: CREATED
+stable tag: phase2b-batch4-step7-record-filter-stable -> 25c9f43
+tag commit: 25c9f43 Merge Phase 2B Batch4 Step7 record filter verification evidence
+prior recommended tag target retained for history: 224e12d
+actual tag target decision: 25c9f43, to include merged verification evidence / closeout docs
+final verification before tag: PASS
+backend compileall: PASS
+backend pytest: PASS, 48 passed, 263 warnings
+frontend npm.cmd run build: PASS
+git diff --check: PASS
+master clean before tag: YES
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond tag commit after commit
+new tag created by this archive update: NO
+business code modified after tag: NO
+push: NOT DONE
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+Step 8: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 8 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```

@@ -643,3 +643,28 @@ agent_outputs/docs/PHASE2B_BATCH4_STEP7_RECORD_FILTER_CLOSEOUT.md
 ```
 
 This is a documentation-only evidence / closeout archive. It does not push, does not create a tag, does not edit business code, and does not authorize Step 8.
+
+## Phase 2B Batch4 Step 7 Stable Tag Post-Tag Archive Update (2026-05-23)
+
+```text
+Step 7 stable tag: CREATED
+stable tag: phase2b-batch4-step7-record-filter-stable -> 25c9f43
+tag commit: 25c9f43 Merge Phase 2B Batch4 Step7 record filter verification evidence
+final verification before tag:
+  - git diff --check HEAD~1..HEAD: PASS
+  - git diff --check: PASS
+  - cd web-flask && python -m compileall .: PASS
+  - cd web-flask && python -m pytest: PASS, 48 passed, 263 warnings
+  - cd web-vue && npm.cmd run build: PASS
+  - master working tree before tag: clean
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this documentation-only archive commit advances HEAD beyond tag commit after commit
+push: NOT DONE
+new tag created by this archive update: NO
+business code modified after tag: NO
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+Step 8: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 8 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```
+
+The pre-tag recommendation to target `224e12d` is retained as historical planning/evidence. The actual stable-tag decision points to the evidence merge commit `25c9f43`, consistent with the preceding batch closeout pattern.

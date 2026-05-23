@@ -141,3 +141,27 @@ No DB/Docker/runtime/storage/model-contract rollback is expected because those a
 Phase 2B Batch4 Step 7: CLOSED / VERIFIED / DOCS ARCHIVED
 Reason: Detection Records Filter/Search Enhancement was authorized, implemented, merged, and verified at implementation HEAD 224e12d. Backend and frontend verification passed; pagination, permissions, compatibility, and unchanged adjacent flows are recorded; forbidden areas remain unentered; no push or tag was performed; Step 8 is not authorized.
 ```
+
+## 9. Post-Tag Archive Update
+
+The stable-tag step was completed after the verification/closeout archive above. The earlier recommendation targeting `224e12d` is historical; the actual tag target includes this merged closeout evidence, consistent with the Step 5 / Step 6 process.
+
+```text
+Step 7 stable tag: CREATED
+stable tag: phase2b-batch4-step7-record-filter-stable -> 25c9f43
+tag commit: 25c9f43 Merge Phase 2B Batch4 Step7 record filter verification evidence
+final verification before tag: PASS
+backend compileall: PASS
+backend pytest: PASS, 48 passed, 263 warnings
+frontend npm.cmd run build: PASS
+git diff --check: PASS
+master clean before tag: YES
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond tag commit after commit
+new tag created by this archive update: NO
+business code modified after tag: NO
+push: NOT DONE
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+Step 8: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 8 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```
