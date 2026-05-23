@@ -464,3 +464,37 @@ Confirmed NOT changed:
 - AI Agent / LLM feature.
 
 This is a documentation-only post-tag archive. It records the already-created Step 6 stable tag and does not push, create a new tag, edit business code, or authorize Step 7.
+
+## Phase 2B Batch4 Step 7 Record Filter Closeout Archive (2026-05-23)
+
+```text
+Step 7 scope: Detection Records Filter/Search Enhancement
+Step 7 status: CLOSED / VERIFIED / DOCS ARCHIVED
+Current HEAD / master implementation baseline before docs closeout: 224e12d
+Backend merge commit: 35d4950
+Frontend merge commit: 224e12d
+GO Decision merge commit: aef6c18
+Planning merge commit: 1d81d33
+latest previous stable tag: phase2b-batch4-step6-dashboard-stable -> 708a61a
+verification: git diff --check HEAD~1..HEAD PASS; git diff --check PASS; compileall PASS; pytest PASS, 48 passed, 263 warnings; npm.cmd run build PASS; vue-tsc --noEmit PASS; vite build PASS; master working tree clean; git tag --points-at HEAD empty
+Step 7 stable tag: NOT CREATED
+recommended stable tag: phase2b-batch4-step7-record-filter-stable
+recommended tag target: 224e12d
+push: NOT DONE
+Step 8: NOT AUTHORIZED
+```
+
+Step 7 extended `GET /api/detection/records` with optional `keyword`, `model_id`, `detection_status`, `date_start`, and `date_end` filters while retaining JWT, existing admin/all-record and normal-user/own-record boundaries, and the `items` / `total` / `page` / `page_size` response shape. It remains compatible with missing/malformed detection results and legacy status sources, with no `detection_result.v1` semantic change.
+
+Frontend Step 7 added keyword, model, status, and date-range controls plus query/reset behavior in `DetectionRecords.vue`. Applied filters are retained during page changes and refresh, reset safely on new searches/page-size changes/reset, and are submitted server-side rather than applied locally to the visible page. Dashboard, Detail, Word report, router, and menu are unchanged.
+
+Formal evidence:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP7_RECORD_FILTER_VERIFICATION_EVIDENCE.md
+agent_outputs/docs/PHASE2B_BATCH4_STEP7_RECORD_FILTER_CLOSEOUT.md
+```
+
+Rollback: revert frontend merge `224e12d` and/or backend merge `35d4950` if needed; previous stable baseline is `phase2b-batch4-step6-dashboard-stable` -> `708a61a`.
+
+This is a documentation-only closeout archive. It does not push, create a tag, edit business code, or authorize Step 8.

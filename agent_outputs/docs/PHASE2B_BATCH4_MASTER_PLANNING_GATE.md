@@ -589,3 +589,57 @@ Confirmed NOT changed:
 - AI Agent / LLM feature.
 
 This is a documentation-only post-tag archive. It records the already-created Step 6 stable tag and does not push, create a new tag, edit business code, or authorize Step 7.
+
+## Phase 2B Batch4 Step 7 Record Filter Verification / Closeout Archive (2026-05-23)
+
+```text
+Step 7 scope: Detection Records Filter/Search Enhancement
+Step 7 status: CLOSED / VERIFIED / DOCS ARCHIVED
+Current HEAD / master implementation baseline before docs closeout: 224e12d
+Backend merge commit: 35d4950 Merge Phase 2B Batch4 Step7 backend record filters
+Frontend merge commit: 224e12d Merge Phase 2B Batch4 Step7 frontend record filters
+GO Decision merge commit: aef6c18 Merge Phase 2B Batch4 Step7 record filter implementation GO decision
+Planning merge commit: 1d81d33 Merge Phase 2B Batch4 Step7 planning
+latest previous stable tag: phase2b-batch4-step6-dashboard-stable -> 708a61a
+verification:
+  - git diff --check HEAD~1..HEAD: PASS
+  - git diff --check: PASS
+  - cd web-flask && python -m compileall .: PASS
+  - cd web-flask && python -m pytest: PASS, 48 passed, 263 warnings
+  - cd web-vue && npm.cmd run build: PASS
+  - vue-tsc --noEmit: PASS
+  - vite build: PASS
+  - master working tree before docs closeout: clean
+  - git tag --points-at HEAD: empty
+Step 7 stable tag: NOT CREATED
+recommended stable tag: phase2b-batch4-step7-record-filter-stable
+recommended tag target: 224e12d
+push: NOT DONE
+Step 8: NOT AUTHORIZED
+```
+
+Closed implementation file scope:
+
+```text
+Backend:
+  - web-flask/routes/detection.py
+  - web-flask/services/detection_service.py
+  - web-flask/tests/test_detection_records_filters.py
+Frontend:
+  - web-vue/src/api/detection.ts
+  - web-vue/src/types/detection.ts
+  - web-vue/src/views/DetectionRecords.vue
+```
+
+Step 7 added optional `keyword`, `model_id`, `detection_status`, `date_start`, and `date_end` filters to the existing JWT-protected records API while retaining admin/all-record and normal-user/own-record visibility, pagination response shape, legacy/malformed-result compatibility, and `detection_result.v1` semantics. The frontend added the filter toolbar and server-side `appliedFilters` paging/reset/refresh behavior without altering Dashboard, Detail, Word report, router, or menu.
+
+Confirmed not changed: DB schema; Docker/runtime/storage; model/weights/classes/training; JWT/permission semantics; Dashboard; Detail; Word report; router/menu; video/realtime implementation; AI Agent / LLM features.
+
+Formal evidence:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP7_RECORD_FILTER_VERIFICATION_EVIDENCE.md
+agent_outputs/docs/PHASE2B_BATCH4_STEP7_RECORD_FILTER_CLOSEOUT.md
+```
+
+This is a documentation-only evidence / closeout archive. It does not push, does not create a tag, does not edit business code, and does not authorize Step 8.

@@ -313,3 +313,35 @@ Confirmed NOT changed:
 - AI Agent / LLM feature.
 
 This is a documentation-only post-tag archive. It records the already-created Step 6 stable tag and does not push, create a new tag, edit business code, or authorize Step 7.
+
+## Phase 2B Batch4 Step 7 Record Filter Closeout Archive (2026-05-23)
+
+```text
+Step 7 scope: Detection Records Filter/Search Enhancement
+Step 7 status: CLOSED / VERIFIED / DOCS ARCHIVED
+Current HEAD / master implementation baseline before docs closeout: 224e12d
+Backend merge commit: 35d4950
+Frontend merge commit: 224e12d
+GO Decision merge commit: aef6c18
+Planning merge commit: 1d81d33
+latest previous stable tag: phase2b-batch4-step6-dashboard-stable -> 708a61a
+verification: git diff --check HEAD~1..HEAD PASS; git diff --check PASS; backend compileall PASS; backend pytest PASS, 48 passed, 263 warnings; npm.cmd run build PASS; vue-tsc --noEmit PASS; vite build PASS; master working tree clean; git tag --points-at HEAD empty
+Step 7 stable tag: NOT CREATED
+recommended stable tag: phase2b-batch4-step7-record-filter-stable
+recommended tag target: 224e12d
+push: NOT DONE
+Step 8: NOT AUTHORIZED
+```
+
+Step 7 adds optional records-list search/filter parameters (`keyword`, `model_id`, `detection_status`, `date_start`, `date_end`) to the existing JWT-protected API, preserves role-scoped visibility and pagination response shape, and adds corresponding server-side filter controls to `DetectionRecords.vue`. Dashboard, Detail, Word report, router, menu, DB schema, Docker/runtime/storage, model/training assets, and `detection_result.v1` semantics are unchanged.
+
+Formal evidence:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP7_RECORD_FILTER_VERIFICATION_EVIDENCE.md
+agent_outputs/docs/PHASE2B_BATCH4_STEP7_RECORD_FILTER_CLOSEOUT.md
+```
+
+Rollback reference: revert frontend merge `224e12d` and backend merge `35d4950` if needed; previous stable baseline is `phase2b-batch4-step6-dashboard-stable` -> `708a61a`.
+
+This is a documentation-only closeout archive. It does not push, create a tag, edit business code, or authorize Step 8.
