@@ -155,15 +155,45 @@ def detect_image(db, user, image_file, model_id, confidence_threshold=0.5, save_
     }
 
 
-def list_records(db, user, page=1, page_size=20):
+def _keyword_like_pattern(keyword):
+    escaped = str(keyword).lower().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"%{escaped}%"
+
+
+def list_records(db, user, page=1, page_size=20, keyword=None, model_id=None, detection_status=None, date_start=None, date_end=None):
+    conditions = []
+    params = []
+    if int(user["role"]) != 1:
+        conditions.append("user_id=?")
+        params.append(user["id"])
+    if keyword:
+        conditions.append("LOWER(original_image_object_key) LIKE ? ESCAPE '\\'")
+        params.append(_keyword_like_pattern(keyword))
+    if model_id:
+        conditions.append("model_id=?")
+        params.append(model_id)
+    if date_start:
+        conditions.append("create_time>=?")
+        params.append(date_start)
+    if date_end:
+        conditions.append("create_time<=?")
+        params.append(date_end)
+
+    where_clause = ""
+    if conditions:
+        where_clause = " WHERE " + " AND ".join(conditions)
+    query = "SELECT * FROM detection_records" + where_clause + " ORDER BY create_time DESC"
+
     offset = (page - 1) * page_size
-    if int(user["role"]) == 1:
-        total = db.execute("SELECT COUNT(*) AS n FROM detection_records").fetchone()["n"]
-        rows = db.execute("SELECT * FROM detection_records ORDER BY create_time DESC LIMIT ? OFFSET ?", (page_size, offset)).fetchall()
+    if detection_status:
+        rows = db.execute(query, tuple(params)).fetchall()
+        rows = [row for row in rows if _canonical_detection_status(row) == detection_status]
+        total = len(rows)
+        page_rows = rows[offset:offset + page_size]
     else:
-        total = db.execute("SELECT COUNT(*) AS n FROM detection_records WHERE user_id=?", (user["id"],)).fetchone()["n"]
-        rows = db.execute("SELECT * FROM detection_records WHERE user_id=? ORDER BY create_time DESC LIMIT ? OFFSET ?", (user["id"], page_size, offset)).fetchall()
-    return {"items": [_record_to_dict(r) for r in rows], "total": total, "page": page, "page_size": page_size}
+        total = db.execute("SELECT COUNT(*) AS n FROM detection_records" + where_clause, tuple(params)).fetchone()["n"]
+        page_rows = db.execute(query + " LIMIT ? OFFSET ?", tuple(params) + (page_size, offset)).fetchall()
+    return {"items": [_record_to_dict(r) for r in page_rows], "total": total, "page": page, "page_size": page_size}
 
 
 def get_record(db, user, record_id):
@@ -265,6 +295,18 @@ def _dashboard_record_stats(row):
         "detection_status": normalized_status,
         "confidences": confidences,
     }
+
+
+def _canonical_detection_status(row):
+    stats = _dashboard_record_stats(row)
+    status = str(stats["detection_status"] or "").lower()
+    if status == "unknown":
+        return "unknown"
+    if status in _DETECTED_STATUSES or (status not in _NO_DETECTION_STATUSES and stats["target_count"] > 0):
+        return "detected"
+    if status in _NO_DETECTION_STATUSES or stats["target_count"] == 0:
+        return "no_detection"
+    return "unknown"
 
 
 def _dashboard_record_item(row, stats):
