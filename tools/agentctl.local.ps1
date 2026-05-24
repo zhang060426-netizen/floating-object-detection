@@ -1,15 +1,15 @@
-﻿param(
+param(
   [Parameter(Position = 0)]
   [ValidateSet("status", "guard", "next", "dispatch", "write-prompts", "collect", "review", "verify-backend", "verify-frontend", "verify-docs", "verify-master", "init", "clean-omx")]
   [string]$Command = "status",
 
-  [ValidateSet("planning", "go", "implementation", "review", "evidence")]
-  [string]$Stage = "implementation",
+  [ValidateSet("planning", "read-only", "go", "implementation", "review", "evidence")]
+  [string]$Stage = "read-only",
 
   [ValidatePattern('^[0-9]+$')]
-  [string]$Step = "8",
+  [string]$Step = "9",
 
-  [ValidateSet("all", "backend", "frontend", "docs-test")]
+  [ValidateSet("all", "control-plane", "backend", "frontend", "docs-test")]
   [string]$Role = "all",
 
   [ValidatePattern('^$|^[A-Za-z0-9][A-Za-z0-9._-]*$')]
@@ -24,10 +24,12 @@ $ErrorActionPreference = "Stop"
 
 $Root = Split-Path -Parent $PSScriptRoot
 $Tasks = Join-Path $Root ".agent_tasks"
-$StableTag = "phase2b-batch4-step7-record-filter-stable"
-$StableCommit = "25c9f43"
-$Step8AuthorizedBaseline = "fbc95d0"
-$GoDecisionPath = "agent_outputs/docs/PHASE2B_BATCH4_STEP8_LOCAL_WORKFLOW_HARDENING_IMPLEMENTATION_GO_DECISION.md"
+$StableTag = "phase2b-batch4-step8-local-workflow-stable"
+$StableCommit = "3c00a1e"
+$Step9AuthorizedBaseline = "5f21599"
+$PlanningPath = "agent_outputs/docs/PHASE2B_BATCH4_STEP9_LOCAL_AGENT_ORCHESTRATION_V2_PLANNING.md"
+$GoDecisionPath = "agent_outputs/docs/PHASE2B_BATCH4_STEP9_LOCAL_AGENT_ORCHESTRATION_V2_IMPLEMENTATION_GO_DECISION.md"
+$ImplementationAllowlist = "tools/agentctl.local.ps1"
 
 function Invoke-GitRead {
   param([Parameter(Mandatory = $true)][string[]]$Arguments)
@@ -36,6 +38,14 @@ function Invoke-GitRead {
   if ($LASTEXITCODE -ne 0) {
     throw "git $($Arguments -join ' ') failed: $($output -join [Environment]::NewLine)"
   }
+  return (($output | ForEach-Object { [string]$_ }) -join [Environment]::NewLine).Trim()
+}
+
+function Get-GitValueOrEmpty {
+  param([Parameter(Mandatory = $true)][string[]]$Arguments)
+
+  $output = & git -C $Root @Arguments 2>$null
+  if ($LASTEXITCODE -ne 0) { return "" }
   return (($output | ForEach-Object { [string]$_ }) -join [Environment]::NewLine).Trim()
 }
 
@@ -53,6 +63,49 @@ function Test-TrackedAtHead {
   return ($LASTEXITCODE -eq 0)
 }
 
+function Get-LifecycleAuthority {
+  $stableTarget = [string](Get-GitValueOrEmpty -Arguments @("rev-list", "-n", "1", $StableTag))
+  $planningAtHead = Test-TrackedAtHead -Path $PlanningPath
+  $goAtHead = Test-TrackedAtHead -Path $GoDecisionPath
+  $planningText = if ($planningAtHead) { Get-GitValueOrEmpty -Arguments @("show", "HEAD:$PlanningPath") } else { "" }
+  $goText = if ($goAtHead) { Get-GitValueOrEmpty -Arguments @("show", "HEAD:$GoDecisionPath") } else { "" }
+  $planningContextPresent = $planningText.Contains("Step 9 implementation remains NOT AUTHORIZED until a later reviewed GO Decision.")
+  $goAllowlistMatches = $goText.Contains("tools/agentctl.local.ps1 only")
+  $goSafetyBoundariesPresent = ($goText -match 'Step 10:[^\r\n]*NOT AUTHORIZED') -and $goText.Contains("Optional outbox-only watch behavior is NOT AUTHORIZED")
+  $authorizedBasePresent = Test-GitAncestor -Ancestor $Step9AuthorizedBaseline
+  $stableMatches = (-not [string]::IsNullOrWhiteSpace($stableTarget)) -and $stableTarget.StartsWith($StableCommit, [System.StringComparison]::OrdinalIgnoreCase)
+  $implementationEligible = $planningAtHead -and $planningContextPresent -and $goAtHead -and $goAllowlistMatches -and $goSafetyBoundariesPresent -and $authorizedBasePresent -and $stableMatches
+  $observations = @()
+  if (-not $planningAtHead) { $observations += "tracked Step 9 planning record missing at HEAD" }
+  elseif (-not $planningContextPresent) { $observations += "tracked Step 9 planning lifecycle prerequisite is missing or conflicting" }
+  if (-not $goAtHead) { $observations += "tracked Step 9 GO Decision missing at HEAD" }
+  elseif (-not $goAllowlistMatches) { $observations += "tracked Step 9 GO Decision helper-only allowlist is missing or conflicting" }
+  elseif (-not $goSafetyBoundariesPresent) { $observations += "tracked Step 9 GO Decision watch/Step 10 hard stops are missing or conflicting" }
+  if (-not $authorizedBasePresent) { $observations += "merged Step 9 GO baseline $Step9AuthorizedBaseline is not an ancestor of HEAD" }
+  if (-not $stableMatches) { $observations += "stable rollback tag is missing or does not target $StableCommit" }
+  if ($implementationEligible) {
+    $summary = "Step 9 merged GO authority is present; any separately assigned implementation is helper-only."
+    $eligibleNextGate = "Separately assigned Step 9 helper-only implementation/review within $ImplementationAllowlist only; this display does not itself authorize a write."
+  } else {
+    $summary = "NO-GO/read-only: required Step 9 tracked/Git/tag authority is missing or conflicting."
+    $eligibleNextGate = "Read-only reconciliation of missing/conflicting tracked authority before any implementation."
+  }
+  return [pscustomobject]@{
+    StableTarget = $stableTarget
+    PlanningAtHead = $planningAtHead
+    PlanningContextPresent = $planningContextPresent
+    GoAtHead = $goAtHead
+    GoAllowlistMatches = $goAllowlistMatches
+    GoSafetyBoundariesPresent = $goSafetyBoundariesPresent
+    AuthorizedBasePresent = $authorizedBasePresent
+    StableMatches = $stableMatches
+    ImplementationEligible = $implementationEligible
+    Observations = $observations
+    Summary = $summary
+    EligibleNextGate = $eligibleNextGate
+  }
+}
+
 function Get-NextStepText {
   $number = 0
   if ([int]::TryParse($Step, [ref]$number)) {
@@ -62,46 +115,60 @@ function Get-NextStepText {
 }
 
 function Get-StagePolicy {
-  $nextStep = Get-NextStepText
+  param([Parameter(Mandatory = $true)][object]$Authority)
+
   switch ($Stage) {
     "planning" {
       return [pscustomobject]@{
         Label = "Planning"
-        Allowed = "Prepare or review a scoped plan and read-only scan prompts; do not implement."
-        NextAction = "Complete planning review, then request an explicit GO Decision gate."
-        HardStops = @("No implementation.", "No merge, tag or push.", "No Step $nextStep implementation.")
+        Allowed = "Prepare or review scoped planning only under an explicit planning assignment; do not implement."
+        NextAction = "Submit planning for a separately reviewed gate decision; the requested planning view does not reopen a completed gate."
+        HardStops = @("No implementation.", "No merge, tag or push.", "No Step 10 implementation.")
+      }
+    }
+    "read-only" {
+      return [pscustomobject]@{
+        Label = "Read-only Scan"
+        Allowed = "Inspect repository and tracked authority only; do not edit tracked files or produce write-producing verification effects."
+        NextAction = "Return read-only findings to the Leader for an explicit gate; do not infer implementation authority from local results."
+        HardStops = @("No implementation or implicit local task writes.", "Do not run write-producing verification as a read-only scan.", "No merge, tag, push or Step 10 implementation.")
       }
     }
     "go" {
       return [pscustomobject]@{
         Label = "GO Decision"
-        Allowed = "Draft or review the tracked authorization decision only within its assigned documentation scope."
-        NextAction = "Require reviewed/merged GO authority before creating an implementation branch."
-        HardStops = @("No implementation before reviewed/merged GO authority.", "No tag or push.", "No Step $nextStep implementation.")
+        Allowed = "Draft or review a tracked authorization decision only within separately assigned documentation scope."
+        NextAction = "Require reviewed and merged tracked GO authority plus a separately issued implementation task before edits."
+        HardStops = @("No implementation from a draft or local prompt.", "No automatic merge, tag or push.", "No Step 10 implementation.")
       }
     }
     "implementation" {
+      $allowed = if ($Authority.ImplementationEligible) {
+        "Only under a separately issued implementation task, edit the tracked allowlist: $ImplementationAllowlist."
+      } else {
+        "NO-GO for implementation: tracked/Git/tag authority is incomplete or conflicting; use read-only reconciliation only."
+      }
       return [pscustomobject]@{
         Label = "Implementation"
-        Allowed = "Implement only files explicitly allowlisted by the approved task; Step 8 current tracked allowlist is tools/agentctl.local.ps1 only."
-        NextAction = "Return the isolated implementation branch and validation evidence for Leader review."
-        HardStops = @("No merge to master, tag creation or push.", "No business, runtime, contract or model-surface expansion.", "No Step $nextStep implementation.")
+        Allowed = $allowed
+        NextAction = "Return the isolated helper-only branch and disclosed validation evidence for separate Leader review."
+        HardStops = @("No file outside $ImplementationAllowlist.", "No merge, tag, push, pane control or automatic lifecycle transition.", "No Step 10 implementation.")
       }
     }
     "review" {
       return [pscustomobject]@{
         Label = "Review"
-        Allowed = "Review the authorized diff and recorded validation evidence; do not expand implementation scope."
-        NextAction = "Leader decides whether a separately authorized merge/unified-verification action is warranted."
-        HardStops = @("No silent fixes outside a newly authorized implementation task.", "No automatic merge, tag or push.", "No Step $nextStep implementation.")
+        Allowed = "Review the authorized diff and recorded evidence only; review output does not approve, merge or widen implementation scope."
+        NextAction = "Return review findings for a separately authorized evidence or lifecycle decision."
+        HardStops = @("No silent implementation fixes.", "No automatic merge, tag or push.", "No Step 10 implementation.")
       }
     }
     "evidence" {
       return [pscustomobject]@{
         Label = "Evidence"
-        Allowed = "Record only separately authorized verification evidence and explicitly disclosed local validation outputs."
-        NextAction = "Return evidence to the Leader for the next explicit gate."
-        HardStops = @("No implementation changes.", "No automatic merge, tag or push.", "No Step $nextStep implementation.")
+        Allowed = "Record only separately authorized evidence and explicitly disclosed local-only outputs; do not change implementation."
+        NextAction = "Return evidence to the Leader for the next explicit decision gate."
+        HardStops = @("No implementation changes.", "No automatic merge, tag or push.", "No Step 10 implementation.")
       }
     }
   }
@@ -109,6 +176,7 @@ function Get-StagePolicy {
 
 function Get-RoleDefinitions {
   $definitions = @(
+    [pscustomobject]@{ Id = "control-plane"; Name = "Control-Plane"; File = "control_plane.md"; Result = "control_plane_result.md" },
     [pscustomobject]@{ Id = "backend"; Name = "Backend"; File = "backend.md"; Result = "backend_result.md" },
     [pscustomobject]@{ Id = "frontend"; Name = "Frontend"; File = "frontend.md"; Result = "frontend_result.md" },
     [pscustomobject]@{ Id = "docs-test"; Name = "Docs-Test"; File = "docs.md"; Result = "docs_result.md" }
@@ -118,34 +186,28 @@ function Get-RoleDefinitions {
 }
 
 function Get-RoleScope {
-  param([string]$RoleId)
+  param([string]$RoleId, [Parameter(Mandatory = $true)][object]$Authority)
 
-  if ($Step -eq "8") {
-    switch ($Stage) {
-      "implementation" {
-        switch ($RoleId) {
-          "backend" { return "NO-GO for web-flask/** implementation or verification in this task; report any boundary concern only." }
-          "frontend" { return "NO-GO for web-vue/** implementation or build verification in this task; report any boundary concern only." }
-          "docs-test" { return "Do not create tracked evidence or alter documentation; a later evidence activity requires separate authorization." }
-        }
+  switch ($Stage) {
+    "implementation" {
+      if ($RoleId -eq "control-plane" -and $Authority.ImplementationEligible) {
+        return "Tracked implementation allowlist: $ImplementationAllowlist only. No other tracked implementation or local authority state is assigned."
       }
-      "review" { return "Perform read-only review against the Step 8 single-file control-plane allowlist; do not edit tracked files." }
-      "evidence" { return "Act only under a separately issued evidence authorization; do not infer permission from this prompt." }
-      default { return "Perform read-only scope analysis only; Step 8 product implementation is not authorized by this stage." }
+      return "NO-GO for tracked implementation in the $RoleId lane; report boundary observations only and do not edit application, documentation or runtime surfaces."
     }
+    "read-only" { return "Read-only inspection and reporting only; no tracked edit or write-producing verification is assigned in this prompt." }
+    "planning" { return "Planning analysis only when separately assigned; do not edit implementation artifacts or infer later authority." }
+    "go" { return "GO Decision drafting/review only when separately assigned in tracked documentation scope; no helper or product implementation." }
+    "review" { return "Review only the separately submitted authorized diff/evidence; do not silently fix or expand scope." }
+    "evidence" { return "Evidence output only when separately assigned; no implementation or lifecycle transition is authorized." }
   }
-  return "Follow only the explicit allowlist in the assigned Step $Step $Stage task; do not infer additional write scope."
 }
 
 function Get-RolePermittedAction {
-  param([string]$RoleId, [object]$Policy)
+  param([string]$RoleId, [object]$Policy, [Parameter(Mandatory = $true)][object]$Authority)
 
-  if ($Step -eq "8" -and $Stage -eq "implementation") {
-    switch ($RoleId) {
-      "backend" { return "No implementation or verification action is assigned to Backend in this Step 8 control-plane task; report boundary observations only." }
-      "frontend" { return "No implementation or build-verification action is assigned to Frontend in this Step 8 control-plane task; report boundary observations only." }
-      "docs-test" { return "No tracked evidence or documentation edit is assigned during implementation; wait for separate evidence authorization." }
-    }
+  if ($Stage -eq "implementation" -and $RoleId -ne "control-plane") {
+    return "No implementation is assigned to this lane for Step 9 helper-only work; report NO-GO boundary observations only."
   }
   return $Policy.Allowed
 }
@@ -166,14 +228,12 @@ function Get-InboxDisplayPath {
 }
 
 function Show-Status {
+  $authority = Get-LifecycleAuthority
   $branch = Invoke-GitRead -Arguments @("branch", "--show-current")
   $head = Invoke-GitRead -Arguments @("rev-parse", "HEAD")
   $changes = [string](Invoke-GitRead -Arguments @("status", "--porcelain=v1", "--untracked-files=all"))
-  $stableTarget = [string](Invoke-GitRead -Arguments @("rev-list", "-n", "1", $StableTag))
-  $goAtHead = Test-TrackedAtHead -Path $GoDecisionPath
-  $authorizedBasePresent = Test-GitAncestor -Ancestor $Step8AuthorizedBaseline
 
-  Write-Host "== Local Workflow Status (read-only) =="
+  Write-Host "== Local Agent Orchestration Status (read-only) =="
   Write-Host "Repository: $Root"
   Write-Host "Branch: $branch"
   Write-Host "HEAD: $head"
@@ -183,53 +243,63 @@ function Show-Status {
     Write-Host "Dirty status: DIRTY"
     $changes -split "`r?`n" | ForEach-Object { Write-Host "  $_" }
   }
-  Write-Host "Stable restore tag: $StableTag -> $stableTarget (expected prefix $StableCommit)"
-  Write-Host "Requested lifecycle context: Step $Step / $Stage"
-  Write-Host "Tracked Step 8 GO decision at HEAD: $goAtHead"
-  Write-Host "Authorized implementation baseline $Step8AuthorizedBaseline is ancestor of HEAD: $authorizedBasePresent"
-  if ($goAtHead -and $authorizedBasePresent) {
-    Write-Host "Authorization state: Step 8 control-plane implementation may use its explicit allowlist only."
+  Write-Host "Stable rollback tag: $StableTag -> $($authority.StableTarget) (expected prefix $StableCommit; match=$($authority.StableMatches))"
+  Write-Host "Tracked Step 9 planning at HEAD / prerequisite matches: $($authority.PlanningAtHead) / $($authority.PlanningContextPresent)"
+  Write-Host "Tracked Step 9 merged GO Decision at HEAD: $($authority.GoAtHead)"
+  Write-Host "Tracked GO helper allowlist / safety boundaries match: $($authority.GoAllowlistMatches) / $($authority.GoSafetyBoundariesPresent)"
+  Write-Host "Merged GO baseline $Step9AuthorizedBaseline is ancestor of HEAD: $($authority.AuthorizedBasePresent)"
+  Write-Host "Requested display/task context: Step $Step / $Stage (request does not confer authority)"
+  Write-Host "Authority state: $($authority.Summary)"
+  if ($authority.ImplementationEligible) {
+    Write-Host "Current tracked implementation allowlist: $ImplementationAllowlist only"
   } else {
-    Write-Host "Authorization state: implementation authority is not established by live HEAD checks."
+    $authority.Observations | ForEach-Object { Write-Host "Authority issue: $_" }
   }
-  Write-Host "Hard stop: this helper does not authorize or perform merge, tag, push, or next-Step implementation."
+  Write-Host "Hard stop: this helper does not authorize or perform merge, tag, push, pane control, or Step 10 implementation."
 }
 
 function Show-Guard {
-  $policy = Get-StagePolicy
+  $authority = Get-LifecycleAuthority
+  $policy = Get-StagePolicy -Authority $authority
   Write-Host "== Workflow Guard (read-only) =="
-  Write-Host "Context: Step $Step / $($policy.Label)"
-  Write-Host "Allowed now: $($policy.Allowed)"
-  if ($Step -eq "8" -and $Stage -eq "implementation") {
-    Write-Host "Tracked implementation allowlist: tools/agentctl.local.ps1"
-    Write-Host "Local-only explicit outputs: write-prompts -> .agent_tasks/inbox/**; collect/review/task result -> .agent_tasks/outbox/** or declared inbox prompt."
-  }
-  Write-Host "Prohibited surfaces: web-vue/**; web-flask/**; other/model_train/detect/**; .omx/**; .ccpanes/**; .git/info/exclude; contracts, DB/schema, runtime/storage, model/AI behavior."
-  Write-Host "Prohibited actions: merge to master; tag creation/movement; push; clean-omx; Step $(Get-NextStepText) implementation."
+  Write-Host "Requested context: Step $Step / $($policy.Label) (display context only)"
+  Write-Host "Current authority: $($authority.Summary)"
+  Write-Host "Allowed in requested context: $($policy.Allowed)"
+  Write-Host "Step 9 tracked implementation allowlist: $ImplementationAllowlist only"
+  Write-Host "Local-only explicit outputs: write-prompts -> .agent_tasks/inbox/**; collect/task result -> .agent_tasks/outbox/**; review -> .agent_tasks/inbox/**. These do not grant authority."
+  Write-Host "Prohibited surfaces: web-vue/**; web-flask/**; other/model_train/detect/**; .omx/**; .ccpanes/**; contracts, DB/schema, runtime/storage, model/AI behavior."
+  Write-Host "Prohibited actions: merge to master; tag creation/movement; push; CC-Panes pane control; automatic lifecycle transitions; Step 10 implementation."
   Write-Host "Write-producing verification: verify-backend, verify-frontend, verify-master; these require separate authorization and -AcknowledgeWriteEffects."
   Write-Host "Frontend verification notice: npm build may write web-vue/dist/**."
-  Write-Host "Backend verification notice: if explicitly authorized, this helper redirects APP_DB_PATH, APP_STORAGE_ROOT and AI_MODEL_ROOT to a temporary non-production sandbox."
+  Write-Host "Backend verification notice: if separately authorized, this helper redirects APP_DB_PATH, APP_STORAGE_ROOT and AI_MODEL_ROOT to a temporary non-production sandbox."
 }
 
 function Show-Next {
-  $policy = Get-StagePolicy
+  $authority = Get-LifecycleAuthority
+  $policy = Get-StagePolicy -Authority $authority
   Write-Host "== Permitted Next Action (read-only) =="
-  Write-Host "Context: Step $Step / $($policy.Label)"
-  Write-Host "Permitted next action: $($policy.NextAction)"
+  Write-Host "Requested context: Step $Step / $($policy.Label) (request does not confer authority)"
+  Write-Host "Current tracked authority: $($authority.Summary)"
+  Write-Host "Authority-derived eligible gate: $($authority.EligibleNextGate)"
+  Write-Host "Context-specific next action: $($policy.NextAction)"
   Write-Host "Hard stops:"
   $policy.HardStops | ForEach-Object { Write-Host "- $_" }
 }
 
 function Show-Dispatch {
-  Write-Host "== Startup Phrases (display only; no task execution or file writes) =="
+  $authority = Get-LifecycleAuthority
+  $policy = Get-StagePolicy -Authority $authority
+  Write-Host "== Startup Phrases (display only; no writes and no pane control) =="
+  Write-Host "Authority: $($authority.Summary)"
   foreach ($definition in Get-RoleDefinitions) {
     $taskPath = Get-InboxDisplayPath -FileName $definition.File
-    Write-Host ("{0}: You are the {0} Agent. Read {1}, obey its Step {2} {3} scope, perform no unlisted writes or later-step work, and report only as instructed." -f $definition.Name, $taskPath, $Step, $Stage)
+    Write-Host ("{0}: Read {1}; execute only the separately assigned Step {2} {3} scope; keep output at .agent_tasks/outbox/{4} only if requested; no unlisted writes, pane control, merge/tag/push, or Step 10 work." -f $definition.Name, $taskPath, $Step, $policy.Label, $definition.Result)
   }
 }
 
 function Write-Prompts {
-  $policy = Get-StagePolicy
+  $authority = Get-LifecycleAuthority
+  $policy = Get-StagePolicy -Authority $authority
   $targetDirectory = Get-InboxDirectory
   New-Item -ItemType Directory -Force -Path $targetDirectory | Out-Null
 
@@ -238,14 +308,21 @@ function Write-Prompts {
     if ((Test-Path -LiteralPath $path) -and -not $Overwrite) {
       throw "Prompt already exists: $path. Re-run with -Overwrite only when replacing an explicitly local inbox task is intended."
     }
-    $scope = Get-RoleScope -RoleId $definition.Id
-    $permittedAction = Get-RolePermittedAction -RoleId $definition.Id -Policy $policy
+    $scope = Get-RoleScope -RoleId $definition.Id -Authority $authority
+    $permittedAction = Get-RolePermittedAction -RoleId $definition.Id -Policy $policy -Authority $authority
     $hardStops = ($policy.HardStops | ForEach-Object { "- $_" }) -join "`r`n"
     $content = @"
 # Step $Step $($policy.Label) Task - $($definition.Name) Agent
 
 Lifecycle stage: `$Stage = $Stage`
-Local workflow classification: generated inbox instruction only; this file is not tracked implementation authority.
+Local workflow classification: generated local-only inbox instruction; this file is operational convenience state, not tracked implementation authority.
+Current tracked authority summary: $($authority.Summary)
+
+## Authority Hierarchy
+1. Live Git branch/HEAD/tag facts establish repository state.
+2. Tracked planning, GO Decision, verification and closeout/archive records establish lifecycle permission and allowlists.
+3. Explicit task/view parameters request context only and never override missing or conflicting tracked authority.
+4. `.agent_tasks/**` inputs/outputs are local-only operational state and never grant tracked authority.
 
 ## Allowed Scope
 $scope
@@ -253,17 +330,20 @@ $scope
 ## Permitted Action
 $permittedAction
 
+## Output Boundary
+If an output is explicitly required by this task, write local-only operational output only to:
+`.agent_tasks/outbox/$($definition.Result)`
+No local output may infer PASS, approve work, or transition a lifecycle stage.
+
 ## Required Guardrails
 $hardStops
+- Step 9 implementation allowlist, when separately authorized and applicable to this role, is $ImplementationAllowlist only.
 - Do not modify any path not explicitly assigned in this task.
-- Treat live Git and tracked authorization artifacts as authoritative over stale local state.
-- Treat verify-backend, verify-frontend and verify-master as write-producing verification, never as read-only scan operations.
+- Treat verify-backend, verify-frontend and verify-master as write-producing verification requiring separate authorization and explicit acknowledgement; never treat them as read-only scans.
+- Do not create, navigate, focus, inject into or control CC-Panes panes.
+- Do not implement watch; any future watch request requires a revised separately reviewed decision.
 
-## Return Path
-If an output is explicitly required by this task, write local-only operational evidence to:
-`.agent_tasks/outbox/$($definition.Result)`
-
-Do not treat this generated prompt as authorization to merge, tag, push, or enter Step $(Get-NextStepText) implementation.
+This generated prompt does not authorize merge, tag, push, automatic lifecycle action, or Step 10 implementation.
 "@
     Set-Content -LiteralPath $path -Value $content -Encoding UTF8
     Write-Host "[WRITE] Wrote local-only inbox prompt: $(Get-InboxDisplayPath -FileName $definition.File)"
@@ -276,7 +356,7 @@ function Collect-Results {
   $summary = Join-Path $outbox "summary.md"
   $entries = @("leader", "backend", "frontend", "docs", "control_plane")
 
-  "# Agent Results Summary`r`n`r`nGenerated at: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`r`n" | Set-Content -LiteralPath $summary -Encoding UTF8
+  "# Agent Results Summary`r`n`r`nGenerated at: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`r`n`r`nLocal-only aggregation: this summary does not infer PASS, approve work, transition stages, merge, tag, push or authorize Step 10.`r`n" | Set-Content -LiteralPath $summary -Encoding UTF8
   foreach ($name in $entries) {
     $file = Join-Path $outbox "${name}_result.md"
     Add-Content -LiteralPath $summary -Encoding UTF8 -Value "`r`n---`r`n## $name result`r`n"
@@ -287,37 +367,41 @@ function Collect-Results {
     }
   }
   Write-Host "[WRITE] Collected local-only result summary: .agent_tasks/outbox/summary.md"
-  Write-Host "No merge, tag, push or subsequent-step action was performed."
+  Write-Host "No PASS decision, approval, transition, merge, tag, push or Step 10 action was inferred or performed."
 }
 
 function Write-ReviewPrompt {
-  $policy = Get-StagePolicy
-  $inbox = Join-Path $Tasks "inbox"
-  New-Item -ItemType Directory -Force -Path $inbox | Out-Null
-  $review = Join-Path $inbox "leader_review.md"
+  $authority = Get-LifecycleAuthority
+  $policy = Get-StagePolicy -Authority $authority
+  $targetDirectory = Get-InboxDirectory
+  New-Item -ItemType Directory -Force -Path $targetDirectory | Out-Null
+  $review = Join-Path $targetDirectory "leader_review.md"
+  $reviewPath = Get-InboxDisplayPath -FileName "leader_review.md"
   $hardStops = ($policy.HardStops | ForEach-Object { "- $_" }) -join "`r`n"
   $content = @"
 # Leader Review Task - Step $Step $($policy.Label)
 
-Review the isolated branch and local results against live Git/tracked authority.
+This is a local-only review prompt. It is not tracked authority and cannot infer PASS, approval, lifecycle transition, merge, tag, push or Step 10 authority.
+Current tracked authority summary: $($authority.Summary)
+
+Authority hierarchy: live Git/tag facts first; tracked planning/GO/evidence/closeout records second; explicit parameters are requested context only; `.agent_tasks/**` is operational state only.
 
 Required checks:
-1. Confirm current branch, HEAD and authorized baseline.
-2. Confirm tracked modified files are inside the assigned allowlist.
-3. Confirm validation commands actually run and disclosed local-only outputs.
-4. Confirm write-producing verification was not mistaken for read-only status.
-5. Confirm no merge, tag, push or Step $(Get-NextStepText) implementation occurred.
+1. Confirm current branch, HEAD, rollback tag and merged GO baseline.
+2. Confirm tracked modified files remain inside $ImplementationAllowlist only when implementation is separately assigned.
+3. Confirm validation commands actually run and all local-only outputs are disclosed.
+4. Confirm write-producing verification was not mistaken for read-only status and still requires acknowledgement.
+5. Confirm no pane control, watch, merge, tag, push or Step 10 implementation occurred.
 
 Hard stops:
 $hardStops
 
-Write any explicitly requested local-only decision output to `.agent_tasks/outbox/leader_result.md`.
-This generated prompt does not authorize later lifecycle actions.
+Write any explicitly requested local-only decision output only to `.agent_tasks/outbox/leader_result.md`.
+Do not silently fix implementation or authorize later lifecycle actions from this prompt.
 "@
   Set-Content -LiteralPath $review -Value $content -Encoding UTF8
-  Write-Host "[WRITE] Generated local-only review prompt: .agent_tasks/inbox/leader_review.md"
+  Write-Host "[WRITE] Generated local-only review prompt: $reviewPath"
 }
-
 function Assert-WriteVerificationAuthorized {
   param([string]$VerificationName, [string]$EffectMessage)
 
