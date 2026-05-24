@@ -517,3 +517,27 @@ next allowed step: Phase 2B Batch4 Step 8 Planning / Gate only; direct implement
 ```
 
 The earlier recommended target `224e12d` records the pre-tag recommendation. The actual Step 7 stable tag was created on the docs evidence merge commit `25c9f43` to remain consistent with the Step 5 / Step 6 closeout flow.
+
+## Phase 2B Batch4 Step 8 Local Workflow Hardening Stable Tag Post-Tag Archive Update (2026-05-24)
+
+```text
+Step 8 scope: Local Workflow Hardening / control-plane helper only
+Step 8 status: VERIFIED / STABLE TAG CREATED
+implementation artifact: tools/agentctl.local.ps1
+implementation merge commit: c6befa3 Merge Phase 2B Batch4 Step8 control-plane workflow hardening
+evidence merge / tag commit: 3c00a1e Merge Phase 2B Batch4 Step8 local workflow verification evidence
+Step 8 stable tag: CREATED
+stable tag: phase2b-batch4-step8-local-workflow-stable -> 3c00a1e
+final verification before tag: PASS; git diff --check HEAD~1..HEAD PASS; git diff --check PASS; control-plane informational verification PASS; master clean
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond the tag commit after commit
+new tag created by this archive update: NO
+push: NOT DONE
+business code modified after tag: NO
+tools/agentctl.local.ps1 modified after tag: NO
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+Step 9: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 9 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```
+
+The Step 8 stable tag points at the merged evidence/closeout commit `3c00a1e`. This post-tag archive records the completed Step 8 control-plane closeout only; it does not authorize or begin Step 9 implementation.

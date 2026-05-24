@@ -134,3 +134,30 @@ No rollback for business source, database, Docker, runtime/storage, model/traini
 Phase 2B Batch4 Step 8 Local Workflow Hardening: IMPLEMENTATION MERGED / VERIFICATION EVIDENCE PREPARED / CLOSEOUT AND STABLE TAG PENDING
 Reason: the implementation merged at c6befa3 is limited to the tracked control-plane helper tools/agentctl.local.ps1, provides the required workflow-hardening capabilities and safety gates, passed bounded review validation, does not change prohibited business or contract surfaces, does not push or tag, and does not authorize or enter Step 9 implementation. Formal closeout/stable tagging awaits separate review and merge of the evidence documents followed by explicit tag authorization.
 ```
+
+## 9. Post-Tag Closeout Archive Update
+
+The Step 8 stable-tag step was completed after the evidence/closeout merge. Earlier pending-tag language remains as historical pre-tag evidence and is superseded by the completed state below.
+
+```text
+Step 8 status: VERIFIED / STABLE TAG CREATED
+Step 8 stable tag: CREATED
+stable tag: phase2b-batch4-step8-local-workflow-stable -> 3c00a1e
+tag commit: 3c00a1e Merge Phase 2B Batch4 Step8 local workflow verification evidence
+implementation merge commit: c6befa3 Merge Phase 2B Batch4 Step8 control-plane workflow hardening
+single tracked implementation artifact: tools/agentctl.local.ps1
+final verification before tag: PASS
+control-plane informational verification: PASS
+master clean before tag: YES
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond the tag commit after commit
+new tag created by this archive update: NO
+business code modified after tag: NO
+tools/agentctl.local.ps1 modified after tag: NO
+push: NOT DONE
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+Step 9: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 9 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```
+
+This post-tag archive update closes Step 8 documentation around the existing stable tag only. It does not modify the helper or any product/runtime/model/contract surface, and it does not authorize Step 9 implementation.

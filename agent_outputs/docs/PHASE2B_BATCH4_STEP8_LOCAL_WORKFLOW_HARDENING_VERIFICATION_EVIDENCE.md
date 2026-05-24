@@ -218,3 +218,31 @@ If Step 8 implementation rollback is required after a later closeout decision:
 Phase 2B Batch4 Step 8 Local Workflow Hardening: IMPLEMENTATION MERGED / VERIFICATION EVIDENCE DRAFT PREPARED / STABLE TAG PENDING
 Reason: the reviewed control-plane implementation is merged at master baseline c6befa3 and changes only tools/agentctl.local.ps1, matching the GO Decision allowlist. Required workflow helper capabilities and guardrails were reviewed, bounded function checks passed, write-producing verification remains explicitly gated, prohibited application/contract/runtime/model surfaces were not changed, push is not done, no Step 8 tag is created, and Step 9 remains NOT AUTHORIZED.
 ```
+
+## 11. Post-Tag Evidence Addendum
+
+This addendum records the completed stable-tag action after the evidence merge. It supersedes only the earlier pending-tag state; the implementation, scope and verification evidence above remains unchanged.
+
+```text
+Step 8 status: VERIFIED / STABLE TAG CREATED
+Step 8 stable tag: CREATED
+stable tag: phase2b-batch4-step8-local-workflow-stable -> 3c00a1e
+tag commit: 3c00a1e Merge Phase 2B Batch4 Step8 local workflow verification evidence
+implementation merge commit: c6befa3 Merge Phase 2B Batch4 Step8 control-plane workflow hardening
+tracked implementation artifact: tools/agentctl.local.ps1 only
+final verification before tag: PASS
+git diff --check HEAD~1..HEAD: PASS
+git diff --check: PASS
+control-plane informational verification (status / guard / next / dispatch): PASS
+.agent_tasks/** snapshot unchanged by informational verification: PASS
+master clean before tag: YES
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond tag commit after commit
+new tag created by this archive update: NO
+business code modified after tag: NO
+tools/agentctl.local.ps1 modified after tag: NO
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+push: NOT DONE
+Step 9: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 9 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```

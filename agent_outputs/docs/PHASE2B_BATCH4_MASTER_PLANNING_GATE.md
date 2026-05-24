@@ -668,3 +668,32 @@ next allowed step: Phase 2B Batch4 Step 8 Planning / Gate only; direct implement
 ```
 
 The pre-tag recommendation to target `224e12d` is retained as historical planning/evidence. The actual stable-tag decision points to the evidence merge commit `25c9f43`, consistent with the preceding batch closeout pattern.
+
+## Phase 2B Batch4 Step 8 Local Workflow Hardening Stable Tag Post-Tag Archive Update (2026-05-24)
+
+```text
+Step 8 scope: Local Workflow Hardening / control-plane helper only
+Step 8 status: VERIFIED / STABLE TAG CREATED
+tracked implementation artifact: tools/agentctl.local.ps1
+implementation merge commit: c6befa3 Merge Phase 2B Batch4 Step8 control-plane workflow hardening
+verification evidence merge / tag commit: 3c00a1e Merge Phase 2B Batch4 Step8 local workflow verification evidence
+Step 8 stable tag: CREATED
+stable tag: phase2b-batch4-step8-local-workflow-stable -> 3c00a1e
+final verification before tag:
+  - git diff --check HEAD~1..HEAD: PASS
+  - git diff --check: PASS
+  - control-plane informational verification (status / guard / next / dispatch): PASS
+  - .agent_tasks/** snapshot unchanged by informational verification: PASS
+  - master working tree before tag: clean
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this documentation-only archive commit advances HEAD beyond tag commit after commit
+push: NOT DONE
+new tag created by this archive update: NO
+business code modified after tag: NO
+tools/agentctl.local.ps1 modified after tag: NO
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+Step 9: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 9 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```
+
+The actual Step 8 stable-tag decision points to the merged verification evidence / closeout commit `3c00a1e`. This archive does not extend the Step 8 allowlist, change the merged helper, push, create another tag, or authorize Step 9 implementation.
