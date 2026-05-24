@@ -26,6 +26,7 @@ $Root = Split-Path -Parent $PSScriptRoot
 $Tasks = Join-Path $Root ".agent_tasks"
 $StableTag = "phase2b-batch4-step8-local-workflow-stable"
 $StableCommit = "3c00a1e"
+$AuthorizedStep = "9"
 $Step9AuthorizedBaseline = "5f21599"
 $PlanningPath = "agent_outputs/docs/PHASE2B_BATCH4_STEP9_LOCAL_AGENT_ORCHESTRATION_V2_PLANNING.md"
 $GoDecisionPath = "agent_outputs/docs/PHASE2B_BATCH4_STEP9_LOCAL_AGENT_ORCHESTRATION_V2_IMPLEMENTATION_GO_DECISION.md"
@@ -74,8 +75,10 @@ function Get-LifecycleAuthority {
   $goSafetyBoundariesPresent = ($goText -match 'Step 10:[^\r\n]*NOT AUTHORIZED') -and $goText.Contains("Optional outbox-only watch behavior is NOT AUTHORIZED")
   $authorizedBasePresent = Test-GitAncestor -Ancestor $Step9AuthorizedBaseline
   $stableMatches = (-not [string]::IsNullOrWhiteSpace($stableTarget)) -and $stableTarget.StartsWith($StableCommit, [System.StringComparison]::OrdinalIgnoreCase)
-  $implementationEligible = $planningAtHead -and $planningContextPresent -and $goAtHead -and $goAllowlistMatches -and $goSafetyBoundariesPresent -and $authorizedBasePresent -and $stableMatches
+  $requestedStepMatches = ($Step -eq $AuthorizedStep)
+  $implementationEligible = $requestedStepMatches -and $planningAtHead -and $planningContextPresent -and $goAtHead -and $goAllowlistMatches -and $goSafetyBoundariesPresent -and $authorizedBasePresent -and $stableMatches
   $observations = @()
+  if (-not $requestedStepMatches) { $observations += "requested Step $Step does not match current tracked GO authority for Step $AuthorizedStep" }
   if (-not $planningAtHead) { $observations += "tracked Step 9 planning record missing at HEAD" }
   elseif (-not $planningContextPresent) { $observations += "tracked Step 9 planning lifecycle prerequisite is missing or conflicting" }
   if (-not $goAtHead) { $observations += "tracked Step 9 GO Decision missing at HEAD" }
@@ -83,7 +86,10 @@ function Get-LifecycleAuthority {
   elseif (-not $goSafetyBoundariesPresent) { $observations += "tracked Step 9 GO Decision watch/Step 10 hard stops are missing or conflicting" }
   if (-not $authorizedBasePresent) { $observations += "merged Step 9 GO baseline $Step9AuthorizedBaseline is not an ancestor of HEAD" }
   if (-not $stableMatches) { $observations += "stable rollback tag is missing or does not target $StableCommit" }
-  if ($implementationEligible) {
+  if (-not $requestedStepMatches) {
+    $summary = "NO-GO: requested Step $Step does not match current tracked GO authority for Step $AuthorizedStep; no Step $Step implementation task or write scope is authorized."
+    $eligibleNextGate = "Read-only only: Step $Step implementation is not authorized; return to separately gated Step $AuthorizedStep authority handling."
+  } elseif ($implementationEligible) {
     $summary = "Step 9 merged GO authority is present; any separately assigned implementation is helper-only."
     $eligibleNextGate = "Separately assigned Step 9 helper-only implementation/review within $ImplementationAllowlist only; this display does not itself authorize a write."
   } else {
@@ -92,6 +98,8 @@ function Get-LifecycleAuthority {
   }
   return [pscustomobject]@{
     StableTarget = $stableTarget
+    AuthorizedStep = $AuthorizedStep
+    RequestedStepMatches = $requestedStepMatches
     PlanningAtHead = $planningAtHead
     PlanningContextPresent = $planningContextPresent
     GoAtHead = $goAtHead
@@ -146,13 +154,23 @@ function Get-StagePolicy {
       $allowed = if ($Authority.ImplementationEligible) {
         "Only under a separately issued implementation task, edit the tracked allowlist: $ImplementationAllowlist."
       } else {
-        "NO-GO for implementation: tracked/Git/tag authority is incomplete or conflicting; use read-only reconciliation only."
+        "NO-GO for implementation: tracked/Git/tag authority is incomplete, conflicting or does not match requested Step $Step; use read-only reconciliation only."
+      }
+      $fileBoundary = if ($Authority.RequestedStepMatches) {
+        "No file outside $ImplementationAllowlist."
+      } else {
+        "No implementation task or implementation file is authorized for requested Step $Step."
+      }
+      $nextAction = if ($Authority.ImplementationEligible) {
+        "Return the isolated helper-only branch and disclosed validation evidence for separate Leader review."
+      } else {
+        "No implementation action is permitted for requested Step $Step; perform read-only reconciliation only."
       }
       return [pscustomobject]@{
         Label = "Implementation"
         Allowed = $allowed
-        NextAction = "Return the isolated helper-only branch and disclosed validation evidence for separate Leader review."
-        HardStops = @("No file outside $ImplementationAllowlist.", "No merge, tag, push, pane control or automatic lifecycle transition.", "No Step 10 implementation.")
+        NextAction = $nextAction
+        HardStops = @($fileBoundary, "No merge, tag, push, pane control or automatic lifecycle transition.", "No Step 10 implementation.")
       }
     }
     "review" {
@@ -246,7 +264,11 @@ function Show-Status {
   Write-Host "Stable rollback tag: $StableTag -> $($authority.StableTarget) (expected prefix $StableCommit; match=$($authority.StableMatches))"
   Write-Host "Tracked Step 9 planning at HEAD / prerequisite matches: $($authority.PlanningAtHead) / $($authority.PlanningContextPresent)"
   Write-Host "Tracked Step 9 merged GO Decision at HEAD: $($authority.GoAtHead)"
-  Write-Host "Tracked GO helper allowlist / safety boundaries match: $($authority.GoAllowlistMatches) / $($authority.GoSafetyBoundariesPresent)"
+  if ($authority.RequestedStepMatches) {
+    Write-Host "Tracked GO helper allowlist / safety boundaries match: $($authority.GoAllowlistMatches) / $($authority.GoSafetyBoundariesPresent)"
+  } else {
+    Write-Host "Tracked Step $($authority.AuthorizedStep) GO details are not exposed as permission for requested Step $Step."
+  }
   Write-Host "Merged GO baseline $Step9AuthorizedBaseline is ancestor of HEAD: $($authority.AuthorizedBasePresent)"
   Write-Host "Requested display/task context: Step $Step / $Stage (request does not confer authority)"
   Write-Host "Authority state: $($authority.Summary)"
@@ -265,7 +287,11 @@ function Show-Guard {
   Write-Host "Requested context: Step $Step / $($policy.Label) (display context only)"
   Write-Host "Current authority: $($authority.Summary)"
   Write-Host "Allowed in requested context: $($policy.Allowed)"
-  Write-Host "Step 9 tracked implementation allowlist: $ImplementationAllowlist only"
+  if ($authority.RequestedStepMatches) {
+    Write-Host "Step 9 tracked implementation allowlist: $ImplementationAllowlist only"
+  } else {
+    Write-Host "Requested Step $Step implementation write scope: NONE (NO-GO; current tracked GO authority is Step $($authority.AuthorizedStep) only)."
+  }
   Write-Host "Local-only explicit outputs: write-prompts -> .agent_tasks/inbox/**; collect/task result -> .agent_tasks/outbox/**; review -> .agent_tasks/inbox/**. These do not grant authority."
   Write-Host "Prohibited surfaces: web-vue/**; web-flask/**; other/model_train/detect/**; .omx/**; .ccpanes/**; contracts, DB/schema, runtime/storage, model/AI behavior."
   Write-Host "Prohibited actions: merge to master; tag creation/movement; push; CC-Panes pane control; automatic lifecycle transitions; Step 10 implementation."
@@ -291,6 +317,10 @@ function Show-Dispatch {
   $policy = Get-StagePolicy -Authority $authority
   Write-Host "== Startup Phrases (display only; no writes and no pane control) =="
   Write-Host "Authority: $($authority.Summary)"
+  if (-not $authority.RequestedStepMatches) {
+    Write-Host "NO-GO: no startup phrase is emitted for unauthorized Step $Step; this helper will not dispatch implementation outside current tracked authority."
+    return
+  }
   foreach ($definition in Get-RoleDefinitions) {
     $taskPath = Get-InboxDisplayPath -FileName $definition.File
     Write-Host ("{0}: Read {1}; execute only the separately assigned Step {2} {3} scope; keep output at .agent_tasks/outbox/{4} only if requested; no unlisted writes, pane control, merge/tag/push, or Step 10 work." -f $definition.Name, $taskPath, $Step, $policy.Label, $definition.Result)
@@ -300,6 +330,9 @@ function Show-Dispatch {
 function Write-Prompts {
   $authority = Get-LifecycleAuthority
   $policy = Get-StagePolicy -Authority $authority
+  if (($Stage -eq "implementation") -and (-not $authority.RequestedStepMatches)) {
+    throw "[NO-GO] write-prompts refused: requested Step $Step implementation does not match current tracked GO authority for Step $($authority.AuthorizedStep). No implementation task file was generated."
+  }
   $targetDirectory = Get-InboxDirectory
   New-Item -ItemType Directory -Force -Path $targetDirectory | Out-Null
 
