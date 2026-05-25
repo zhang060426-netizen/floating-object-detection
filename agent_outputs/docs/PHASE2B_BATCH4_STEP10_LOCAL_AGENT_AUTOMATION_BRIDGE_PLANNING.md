@@ -14,11 +14,13 @@ Use omx exec/team for main-project implementation tasks now: NO-GO
 Modify tools/agentctl.local.ps1 now: NO-GO
 Modify .agent_tasks/** now: NO-GO
 Create Step 10 stable tag now: NO
-Push: NOT DONE
+External hosted-remote push: NOT DONE
 Step 11: NOT AUTHORIZED
 ```
 
 Step 10 may evaluate how a local runner could reduce manual prompt/result copy-paste while retaining the existing human-reviewed gate sequence. This document does not authorize a runner, execute an Agent task, widen write authority, or enter implementation.
+
+Push-state clarification: this English-path local clone uses `origin` to track the local Chinese-path source repository rather than an external hosted remote. During planning-gate review, local tracking showed `origin/master` pointing to the original Step 10 planning commit `3921a12`; that alignment is local clone state and does not represent external publication. No external hosted-remote push was performed by this Step 10 planning activity.
 
 ## 1. Current Baseline
 
@@ -33,7 +35,7 @@ HEAD subject: Archive Batch4 Step9 stable tag
 working tree before Step 10 planning document: clean
 latest Step 9 stable tag:
   phase2b-batch4-step9-local-agent-orchestration-v2-stable -> b05faa8
-push: NOT DONE
+external hosted-remote push before Step 10 planning: NOT DONE
 Step 10 implementation: NOT AUTHORIZED
 ```
 
@@ -64,7 +66,7 @@ Step 10 negative checks: PASS / NO-GO retained
 .agent_tasks/** modification during final informational/negative verification: NO
 tools/agentctl.local.ps1 modified after tag: NO
 business code modified after tag: NO
-push: NOT DONE
+external hosted-remote push: NOT DONE
 Step 10 implementation: NOT AUTHORIZED
 ```
 
@@ -375,7 +377,8 @@ No rollback action is performed by this planning task.
 
 ```text
 Step 10 stable tag: NOT CREATED / NOT AUTHORIZED DURING PLANNING
-push: NOT DONE
+external hosted-remote push: NOT DONE
+local clone tracking note: origin/master may track the local source repository; its alignment with the Step 10 planning commit is not external publication
 Step 11: NOT AUTHORIZED
 ```
 
@@ -395,5 +398,5 @@ The next permitted activity after this planning document is review of the planni
 - [x] Disposable sandbox test repository design recommended.
 - [x] GO Decision prerequisites and fail-closed default recorded.
 - [x] Queue and auto-review boundaries preserve tracked authority.
-- [x] Explicit NO-GO, rollback baseline, no-tag/no-push and Step 11 NO-GO recorded.
+- [x] Explicit NO-GO, rollback baseline, no-tag/no-external-push and Step 11 NO-GO recorded.
 - [x] No implementation is authorized by this document.
