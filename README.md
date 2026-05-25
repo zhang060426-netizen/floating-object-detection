@@ -388,3 +388,28 @@ next allowed step: Phase 2B Batch4 Step 9 Planning / Gate only; direct implement
 ```
 
 Step 8 closed the bounded local workflow hardening lane by merging the reviewable helper and evidence documents before tagging `3c00a1e`. This update is documentation-only and does not authorize Step 9 implementation.
+
+## Phase 2B Batch4 Step 9 Local Agent Orchestration v2 Stable Tag Post-Tag Archive Update (2026-05-25)
+
+```text
+Step 9 scope: Local Agent Orchestration v2 / control-plane helper only
+Step 9 status: VERIFIED / STABLE TAG CREATED
+implementation artifact: tools/agentctl.local.ps1
+implementation merge commit: bf90654 Merge Phase 2B Batch4 Step9 control-plane orchestration v2
+evidence merge / current tag commit: b05faa8 Merge Phase 2B Batch4 Step9 local agent orchestration verification evidence
+Step 9 stable tag: CREATED
+stable tag: phase2b-batch4-step9-local-agent-orchestration-v2-stable -> b05faa8
+current tag commit: b05faa8
+final verification before tag: PASS; git diff --check HEAD~1..HEAD PASS; git diff --check PASS; control-plane informational verification PASS; Step 10 negative verification PASS; .agent_tasks/** snapshot unchanged; master clean
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond the tag commit after commit
+new tag created by this archive update: NO
+push: NOT DONE
+business code modified after tag: NO
+tools/agentctl.local.ps1 modified after tag: NO
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+Step 10: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 10 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```
+
+Step 9 is closed at the stable-tagged evidence baseline `b05faa8`. This documentation-only post-tag archive does not modify the helper or application code, push, create another tag, or authorize Step 10 implementation.

@@ -228,3 +228,26 @@ Step 9 stable tag: NOT CREATED / NOT AUTHORIZED IN THIS TASK
 Push: NOT DONE / NOT AUTHORIZED IN THIS TASK
 Step 10: NOT AUTHORIZED / NOT ENTERED
 ```
+
+## 13. Post-Tag Archive Addendum (2026-05-25)
+
+The authorization block above records the state of this GO Decision at drafting time. Its bounded helper-only implementation was subsequently reviewed, merged and closed through tracked evidence before stable tagging.
+
+```text
+Step 9 status: VERIFIED / STABLE TAG CREATED
+Step 9 stable tag: phase2b-batch4-step9-local-agent-orchestration-v2-stable -> b05faa8
+current tag commit: b05faa8
+implementation merge commit: bf90654 Merge Phase 2B Batch4 Step9 control-plane orchestration v2
+verified implementation artifact: tools/agentctl.local.ps1 only
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond the tag commit after commit
+push: NOT DONE
+new tag created by this archive update: NO
+business code modified after tag: NO
+tools/agentctl.local.ps1 modified after tag: NO
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+Step 10: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 10 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```
+
+This post-tag archive addendum does not widen the GO Decision, modify its sole implementation artifact, push, create another tag, or authorize Step 10 implementation.

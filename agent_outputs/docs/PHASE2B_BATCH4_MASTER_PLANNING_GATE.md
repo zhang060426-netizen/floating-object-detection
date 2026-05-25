@@ -697,3 +697,34 @@ next allowed step: Phase 2B Batch4 Step 9 Planning / Gate only; direct implement
 ```
 
 The actual Step 8 stable-tag decision points to the merged verification evidence / closeout commit `3c00a1e`. This archive does not extend the Step 8 allowlist, change the merged helper, push, create another tag, or authorize Step 9 implementation.
+
+## Phase 2B Batch4 Step 9 Local Agent Orchestration v2 Stable Tag Post-Tag Archive Update (2026-05-25)
+
+```text
+Step 9 scope: Local Agent Orchestration v2 / control-plane helper only
+Step 9 status: VERIFIED / STABLE TAG CREATED
+tracked implementation artifact: tools/agentctl.local.ps1
+implementation merge commit: bf90654 Merge Phase 2B Batch4 Step9 control-plane orchestration v2
+verification evidence merge / current tag commit: b05faa8 Merge Phase 2B Batch4 Step9 local agent orchestration verification evidence
+Step 9 stable tag: CREATED
+stable tag: phase2b-batch4-step9-local-agent-orchestration-v2-stable -> b05faa8
+current tag commit: b05faa8
+final verification before tag:
+  - git diff --check HEAD~1..HEAD: PASS
+  - git diff --check: PASS
+  - control-plane informational verification (status / guard / next / dispatch): PASS
+  - Step 10 negative verification (next / guard / dispatch): PASS / NO-GO maintained
+  - .agent_tasks/** snapshot unchanged by informational/negative verification: PASS
+  - master working tree before tag: clean
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this documentation-only archive commit advances HEAD beyond tag commit after commit
+push: NOT DONE
+new tag created by this archive update: NO
+business code modified after tag: NO
+tools/agentctl.local.ps1 modified after tag: NO
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+Step 10: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 10 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```
+
+The Step 9 stable-tag decision points to merged verification evidence commit `b05faa8`. This archive does not widen the helper-only scope, change product or helper code, push, create another tag, or authorize Step 10 implementation.

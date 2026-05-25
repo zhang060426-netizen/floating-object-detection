@@ -188,3 +188,28 @@ No product, database, Docker, runtime/storage, model/training, API/auth, `detect
 Phase 2B Batch4 Step 9 Local Agent Orchestration v2: IMPLEMENTATION MERGED / VERIFICATION EVIDENCE DRAFT PREPARED / STABLE TAG PENDING
 Reason: the reviewed helper-only implementation merged at bf90654 conforms to the GO Decision allowlist, resolves the stale lifecycle context, fails closed for unauthorized future-step requests after the 96c05ec remediation, preserves explicit local-only/write-producing boundaries, leaves protected application/runtime/model/contract surfaces unchanged, creates no tag, performs no push, and leaves Step 10 NOT AUTHORIZED.
 ```
+
+## 10. Stable Tag Post-Tag Archive Addendum (2026-05-25)
+
+The verification evidence above was merged at `b05faa8` and subsequently used as the final verified stable-tag target.
+
+```text
+Step 9 status: VERIFIED / STABLE TAG CREATED
+Step 9 stable tag: phase2b-batch4-step9-local-agent-orchestration-v2-stable -> b05faa8
+current tag commit: b05faa8
+final verification before tag: PASS
+control-plane informational commands: PASS
+Step 10 negative checks: PASS / NO-GO retained
+.agent_tasks/** modification during final informational/negative verification: NO
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond the tag commit after commit
+push: NOT DONE
+new tag created by this archive update: NO
+business code modified after tag: NO
+tools/agentctl.local.ps1 modified after tag: NO
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+Step 10: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 10 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```
+
+This addendum archives the existing stable tag only; it does not create a tag, push, modify the helper or product code, or authorize Step 10 implementation.

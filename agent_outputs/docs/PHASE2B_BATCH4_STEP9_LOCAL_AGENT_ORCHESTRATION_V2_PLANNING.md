@@ -333,3 +333,25 @@ in Section 7.
 Allowed next direction: Phase 2B Batch4 Step 9 read-only scan / gate evidence only.
 Not allowed: Step 9 implementation, Step 10 implementation, helper edits, external orchestrator integration, pane automation, merge/tag/push or application work.
 ```
+
+## 14. Post-Tag Archive Addendum (2026-05-25)
+
+The preceding sections record the planning-stage gate at the time it was authored. Step 9 subsequently completed its separately reviewed implementation, evidence merge and final verification sequence.
+
+```text
+Step 9 status: VERIFIED / STABLE TAG CREATED
+Step 9 stable tag: phase2b-batch4-step9-local-agent-orchestration-v2-stable -> b05faa8
+current tag commit: b05faa8
+implementation merge commit: bf90654 Merge Phase 2B Batch4 Step9 control-plane orchestration v2
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond the tag commit after commit
+push: NOT DONE
+new tag created by this archive update: NO
+business code modified after tag: NO
+tools/agentctl.local.ps1 modified after tag: NO
+FLOATING_OBJECT_PROJECT_CONTEXT_MASTER.md: NOT FOUND; NOT CREATED
+Step 10: NOT AUTHORIZED
+next allowed step: Phase 2B Batch4 Step 10 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```
+
+This addendum is documentation-only and does not reopen Step 9 implementation or authorize Step 10 implementation.
