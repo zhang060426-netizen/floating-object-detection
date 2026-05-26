@@ -159,3 +159,29 @@ Review the Step10 verification evidence and this closeout draft. If that
 review is PASS, consider only a separately authorized final verification /
 stable tag gate. Do not tag, push or enter Step11 from this draft.
 ```
+
+## 10. Stable Tag Post-Tag Archive Addendum (2026-05-26)
+
+The preceding closeout draft was reviewed as PASS. Final verification passed and the evidence archive commit is now the stable Step10 baseline.
+
+```text
+Step 10 status: VERIFIED / STABLE TAG CREATED
+implementation merge commit: 3bdc790 Permit bounded passive observation without advancing lifecycle state
+evidence archive / stable tag target: 150967c Archive Batch4 Step10 passive watch verification evidence
+Step 10 stable tag: phase2b-batch4-step10-passive-watch-stable -> 150967c3b793b0432692932f1e308829be779493
+tag pointed at HEAD before this post-tag archive commit: YES
+final verification before tag: PASS
+verified implementation artifact: tools/agentctl.local.ps1 only
+passive watch exact-path and bounded-wait contract: PASS
+passive watch smoke matrix and deadline-boundary fail-closed result: PASS
+pre-existing .agent_tasks/** file hash snapshot unchanged: PASS
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this docs-only commit advances HEAD beyond the tag commit after commit
+new tag created by this archive update: NO
+external hosted-remote push: NOT DONE
+business code modified after tag: NO
+tools/agentctl.local.ps1 modified after tag: NO
+Step11: NOT AUTHORIZED / NOT ENTERED
+```
+
+The stable tag remains on `150967c`; this post-tag archive does not widen implementation scope, create a new tag, push, change helper or business code, or authorize Step11.

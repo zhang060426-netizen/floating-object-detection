@@ -165,3 +165,31 @@ separately authorized final-verification / stable-tag gate be considered.
 ```
 
 No stable tag is created by this evidence archive. Push remains not done. Step11 remains not authorized.
+
+## 9. Stable Tag Post-Tag Archive Addendum (2026-05-26)
+
+The verification evidence above was reviewed as PASS and used as the final verified stable-tag target.
+
+```text
+Step 10 status: VERIFIED / STABLE TAG CREATED
+implementation merge commit: 3bdc790 Permit bounded passive observation without advancing lifecycle state
+evidence archive / tag commit: 150967c Archive Batch4 Step10 passive watch verification evidence
+Step 10 stable tag: phase2b-batch4-step10-passive-watch-stable -> 150967c3b793b0432692932f1e308829be779493
+tag pointed at HEAD before this post-tag archive commit: YES
+final verification before tag: PASS
+implementation artifact: tools/agentctl.local.ps1 only
+PowerShell syntax parse: PASS
+helper status / Step 10 review guard: PASS
+passive watch outcome matrix: PASS
+timeout-boundary fail-closed: PASS
+pre-existing .agent_tasks/** hash snapshot unchanged by final smoke verification: PASS
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this documentation-only commit advances HEAD beyond the stable tag target after commit
+new tag created by this archive update: NO
+external hosted-remote push: NOT DONE
+tools/agentctl.local.ps1 modified by this archive update: NO
+business or protected implementation surface modified by this archive update: NO
+Step11: NOT AUTHORIZED / NOT ENTERED
+```
+
+The stable tag remains fixed at `150967c` after this documentation-only archive commit advances `master`. This addendum creates no new tag, performs no push, changes no helper or product code, and does not authorize Step11.

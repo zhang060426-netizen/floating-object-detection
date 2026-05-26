@@ -728,3 +728,34 @@ next allowed step: Phase 2B Batch4 Step 10 Planning / Gate only; direct implemen
 ```
 
 The Step 9 stable-tag decision points to merged verification evidence commit `b05faa8`. This archive does not widen the helper-only scope, change product or helper code, push, create another tag, or authorize Step 10 implementation.
+
+## Phase 2B Batch4 Step 10 Passive Watch / Outbox-Only Stable Tag Post-Tag Archive Update (2026-05-26)
+
+```text
+Step 10 scope: Passive Watch / Outbox-Only / control-plane helper only
+Step 10 status: VERIFIED / STABLE TAG CREATED
+tracked implementation artifact: tools/agentctl.local.ps1
+implementation merge commit: 3bdc790 Permit bounded passive observation without advancing lifecycle state
+verification evidence archive / current tag commit: 150967c Archive Batch4 Step10 passive watch verification evidence
+Step 10 stable tag: CREATED
+stable tag: phase2b-batch4-step10-passive-watch-stable -> 150967c3b793b0432692932f1e308829be779493
+current tag commit before this archive update: 150967c
+final verification before tag:
+  - git diff --check HEAD^1..HEAD: PASS
+  - git diff --check 8f102a2..3bdc790: PASS
+  - PowerShell syntax parse for tools/agentctl.local.ps1: PASS
+  - control-plane read-only status / Step 10 review guard: PASS
+  - passive watch smoke matrix and timeout-boundary fail-closed verification: PASS
+  - pre-existing .agent_tasks/** file hash snapshot unchanged: PASS
+  - master working tree before tag: clean
+post-tag archive commit at start of this docs update: NOT CREATED
+post-tag archive outcome: this documentation-only archive commit advances HEAD beyond the tag commit after commit
+new tag created by this archive update: NO
+push: NOT DONE
+business code modified after tag: NO
+tools/agentctl.local.ps1 modified after tag: NO
+Step 11: NOT AUTHORIZED
+next allowed step: separately reviewed Step 11 Planning / Gate only; direct implementation is NOT AUTHORIZED
+```
+
+The Step 10 stable-tag decision points to verification evidence archive commit `150967c`. This archive does not widen the helper-only scope, change product or helper code, push, create another tag, or authorize Step 11 implementation.
