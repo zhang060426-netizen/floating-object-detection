@@ -1,6 +1,6 @@
 param(
   [Parameter(Position = 0)]
-  [ValidateSet("status", "guard", "next", "dispatch", "write-prompts", "collect", "review", "verify-backend", "verify-frontend", "verify-docs", "verify-master", "init", "clean-omx")]
+  [ValidateSet("status", "guard", "next", "dispatch", "watch-outbox", "write-prompts", "collect", "review", "verify-backend", "verify-frontend", "verify-docs", "verify-master", "init", "clean-omx")]
   [string]$Command = "status",
 
   [ValidateSet("planning", "read-only", "go", "implementation", "review", "evidence")]
@@ -16,7 +16,16 @@ param(
   [string]$PromptSet = "",
 
   [switch]$Overwrite,
-  [switch]$AcknowledgeWriteEffects
+  [switch]$AcknowledgeWriteEffects,
+
+  [Alias("ResultPath")]
+  [string]$Path = "",
+
+  [ValidateRange(0, 86400)]
+  [int]$TimeoutSeconds = 0,
+
+  [ValidateRange(1, 86400)]
+  [int]$PollIntervalSeconds = 2
 )
 
 Set-StrictMode -Version Latest
@@ -243,6 +252,105 @@ function Get-InboxDisplayPath {
     return ".agent_tasks/inbox/$FileName"
   }
   return ".agent_tasks/inbox/$PromptSet/$FileName"
+}
+
+function Write-WatchOutcome {
+  param(
+    [Parameter(Mandatory = $true)][string]$Outcome,
+    [Parameter(Mandatory = $true)][string]$Reason,
+    [Parameter(Mandatory = $true)][int]$ExitCode
+  )
+
+  Write-Host "Outcome: $Outcome"
+  Write-Host "Reason: $Reason"
+  Write-Host "Authority: operational availability only; no PASS, GO, approval or lifecycle completion is inferred."
+  Write-Host "Side effects: none; no collect/review, prompt dispatch, Agent run, OMX call, pane control, lifecycle transition, merge, tag or push."
+  return $ExitCode
+}
+
+function Get-OutboxWatchPathState {
+  param([Parameter(Mandatory = $true)][string]$LiteralPath)
+
+  try {
+    if (-not (Test-Path -LiteralPath $LiteralPath)) { return "MISSING" }
+    if (Test-Path -LiteralPath $LiteralPath -PathType Leaf) { return "FILE" }
+    return "WRONG_MATCH"
+  } catch {
+    return "READ_ERROR"
+  }
+}
+
+function Watch-Outbox {
+  Write-Host "== Passive Outbox Watch (read-only) =="
+  Write-Host "Requested exact path: $(if ([string]::IsNullOrWhiteSpace($Path)) { '<not supplied>' } else { $Path })"
+  Write-Host "TimeoutSeconds: $TimeoutSeconds"
+  Write-Host "PollIntervalSeconds: $PollIntervalSeconds"
+
+  if ([string]::IsNullOrWhiteSpace($Path)) {
+    return (Write-WatchOutcome -Outcome "INVALID_PATH" -Reason "An explicit exact result path is required." -ExitCode 2)
+  }
+  if ($Path.IndexOfAny([char[]]"*?[]") -ge 0) {
+    return (Write-WatchOutcome -Outcome "AMBIGUOUS" -Reason "Wildcard or matching syntax is not permitted; supply one exact result path." -ExitCode 2)
+  }
+
+  try {
+    $candidate = if ([System.IO.Path]::IsPathRooted($Path)) {
+      [System.IO.Path]::GetFullPath($Path)
+    } else {
+      [System.IO.Path]::GetFullPath((Join-Path $Root $Path))
+    }
+    $outboxRoot = [System.IO.Path]::GetFullPath((Join-Path $Tasks "outbox"))
+  } catch {
+    return (Write-WatchOutcome -Outcome "INVALID_PATH" -Reason "The requested result path cannot be normalized safely." -ExitCode 2)
+  }
+
+  $outboxPrefix = $outboxRoot.TrimEnd([char[]]"\/") + [System.IO.Path]::DirectorySeparatorChar
+  if (-not $candidate.StartsWith($outboxPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+    return (Write-WatchOutcome -Outcome "INVALID_PATH" -Reason "The exact result path must be a descendant of .agent_tasks/outbox/." -ExitCode 2)
+  }
+  Write-Host "Resolved exact path: $candidate"
+
+  $initialState = Get-OutboxWatchPathState -LiteralPath $candidate
+  switch ($initialState) {
+    "FILE" {
+      return (Write-WatchOutcome -Outcome "STALE_OR_PREEXISTING" -Reason "The exact result file existed before passive observation began." -ExitCode 3)
+    }
+    "WRONG_MATCH" {
+      return (Write-WatchOutcome -Outcome "WRONG_MATCH" -Reason "The exact target exists but is not a result file." -ExitCode 2)
+    }
+    "READ_ERROR" {
+      return (Write-WatchOutcome -Outcome "READ_ERROR" -Reason "The exact target could not be inspected reliably." -ExitCode 2)
+    }
+  }
+
+  if ($TimeoutSeconds -eq 0) {
+    return (Write-WatchOutcome -Outcome "MISSING" -Reason "The exact result file is absent at the one-shot observation boundary." -ExitCode 4)
+  }
+
+  $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+  while ($true) {
+    $remainingMilliseconds = [int][Math]::Ceiling(($deadline - [DateTime]::UtcNow).TotalMilliseconds)
+    if ($remainingMilliseconds -le 0) {
+      return (Write-WatchOutcome -Outcome "TIMED_OUT" -Reason "The bounded wait expired before the exact result file appeared." -ExitCode 5)
+    }
+
+    $pollMilliseconds = [Math]::Min(($PollIntervalSeconds * 1000), $remainingMilliseconds)
+    Start-Sleep -Milliseconds $pollMilliseconds
+    if ([DateTime]::UtcNow -ge $deadline) {
+      return (Write-WatchOutcome -Outcome "TIMED_OUT" -Reason "The bounded wait expired before the exact result file was observed." -ExitCode 5)
+    }
+    switch (Get-OutboxWatchPathState -LiteralPath $candidate) {
+      "FILE" {
+        return (Write-WatchOutcome -Outcome "OBSERVED" -Reason "The exact result file appeared after passive observation began and is available for manual inspection only." -ExitCode 0)
+      }
+      "WRONG_MATCH" {
+        return (Write-WatchOutcome -Outcome "WRONG_MATCH" -Reason "The exact target appeared but is not a result file." -ExitCode 2)
+      }
+      "READ_ERROR" {
+        return (Write-WatchOutcome -Outcome "READ_ERROR" -Reason "The exact target could not be inspected reliably." -ExitCode 2)
+      }
+    }
+  }
 }
 
 function Show-Status {
@@ -517,6 +625,7 @@ try {
     "guard" { Show-Guard }
     "next" { Show-Next }
     "dispatch" { Show-Dispatch }
+    "watch-outbox" { $watchExitCode = Watch-Outbox; exit $watchExitCode }
     "write-prompts" { Write-Prompts }
     "collect" { Collect-Results }
     "review" { Write-ReviewPrompt }
