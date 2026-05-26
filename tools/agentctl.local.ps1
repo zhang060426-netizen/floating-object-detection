@@ -336,6 +336,9 @@ function Watch-Outbox {
 
     $pollMilliseconds = [Math]::Min(($PollIntervalSeconds * 1000), $remainingMilliseconds)
     Start-Sleep -Milliseconds $pollMilliseconds
+    if ([DateTime]::UtcNow -ge $deadline) {
+      return (Write-WatchOutcome -Outcome "TIMED_OUT" -Reason "The bounded wait expired before the exact result file was observed." -ExitCode 5)
+    }
     switch (Get-OutboxWatchPathState -LiteralPath $candidate) {
       "FILE" {
         return (Write-WatchOutcome -Outcome "OBSERVED" -Reason "The exact result file appeared after passive observation began and is available for manual inspection only." -ExitCode 0)
