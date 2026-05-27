@@ -759,3 +759,50 @@ next allowed step: separately reviewed Step 11 Planning / Gate only; direct impl
 ```
 
 The Step 10 stable-tag decision points to verification evidence archive commit `150967c`. This archive does not widen the helper-only scope, change product or helper code, push, create another tag, or authorize Step 11 implementation.
+
+## Phase 2B Batch4 Step 11 Final Delivery Closeout Archive (2026-05-27)
+
+```text
+Step 11 direction: System Finalization / Delivery Readiness
+planning commit: ac2c3f7 Add Batch4 Step11 system finalization planning
+verification demo preflight commit: a55e940 Add Batch4 Step11 verification demo preflight
+verification demo authorization commit: c292953 Authorize Batch4 Step11 verification demo execution
+verification-only demo evidence review: PASS
+delivery demo evidence status: PASS
+delivery boundary: ADMIN_ONLY_ISOLATED_DEMO
+normal-user artifact isolation: NOT CLAIMED
+/api/files/** owner-enforcement: KNOWN LIMITATION RETAINED
+Step 11 implementation: NOT REQUIRED / NOT AUTHORIZED
+Step 12: NOT AUTHORIZED
+tag: NOT CREATED
+external hosted-remote push: NOT DONE
+closeout type: DOCS-ONLY
+```
+
+Accepted final demo scenario:
+
+```text
+login
+-> dashboard
+-> image detection (4测试包/测试图片/1.png; m_yolo26n_dev / YOLO26n Dev Baseline; threshold 0.5)
+-> record list/filter
+-> detail (record dr_c1c9537e6a954c6f85e73deba24d7afa)
+-> Word export/download (detection-report-dr_c1c9537e6a954c6f85e73deba24d7afa.docx)
+-> Word openability
+= PASS
+```
+
+Browser screenshots were not generated because no controllable browser target was
+exposed during the authorized pass. API-assisted verification was reviewed and
+accepted within the selected claim boundary.
+
+Formal closeout artifacts:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP11_FINAL_DELIVERY_CLOSEOUT.md
+agent_outputs/docs/PHASE2B_BATCH4_STEP11_FINAL_DEMO_CHECKLIST.md
+```
+
+This archive closes only the documentation/evidence lane for the selected
+administrator-only demonstration. It changes no application or helper behavior,
+does not create a tag or push, and does not authorize Step 12.

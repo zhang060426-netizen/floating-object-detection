@@ -437,3 +437,39 @@ next allowed step: separately reviewed Step 11 Planning / Gate only; direct impl
 ```
 
 Step 10 is closed at the stable-tagged evidence baseline `150967c`. This documentation-only post-tag archive records the verified passive-watch baseline; it does not modify the helper or application code, push, create another tag, or authorize Step 11 implementation.
+
+## Phase 2B Batch4 Step 11 Final Delivery Closeout Archive (2026-05-27)
+
+```text
+Step 11 planning commit: ac2c3f7
+verification demo preflight commit: a55e940
+verification demo authorization commit: c292953
+verification-only demo evidence review: PASS
+delivery demo evidence status: PASS
+delivery boundary: ADMIN_ONLY_ISOLATED_DEMO
+demo chain: login -> dashboard -> image detection -> record list/filter -> detail -> Word export/download -> Word openability: PASS
+generated record: dr_c1c9537e6a954c6f85e73deba24d7afa
+demo image: 4测试包/测试图片/1.png
+model: m_yolo26n_dev / YOLO26n Dev Baseline
+threshold: 0.5
+Word report: detection-report-dr_c1c9537e6a954c6f85e73deba24d7afa.docx
+browser screenshots: NOT GENERATED; API-assisted verification ACCEPTED
+normal-user artifact isolation: NOT CLAIMED
+/api/files/** owner-enforcement: KNOWN LIMITATION RETAINED
+Step 11 implementation: NOT REQUIRED / NOT AUTHORIZED
+Step 12: NOT AUTHORIZED
+tag: NOT CREATED
+external hosted-remote push: NOT DONE
+closeout type: DOCS-ONLY
+```
+
+Formal closeout artifacts:
+
+```text
+agent_outputs/docs/PHASE2B_BATCH4_STEP11_FINAL_DELIVERY_CLOSEOUT.md
+agent_outputs/docs/PHASE2B_BATCH4_STEP11_FINAL_DEMO_CHECKLIST.md
+```
+
+The accepted evidence closes the selected administrator-only isolated demo
+delivery lane as documentation only. It does not claim normal-user artifact
+isolation, modify product/helper code, create a tag, push, or authorize Step 12.
