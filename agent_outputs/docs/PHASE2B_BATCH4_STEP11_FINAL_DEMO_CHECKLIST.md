@@ -93,3 +93,21 @@ Step 12: NOT AUTHORIZED
 Tag: NOT CREATED
 Push: NOT DONE
 ```
+
+## 7. Stable Tag Post-Tag Checklist Addendum (2026-05-27)
+
+| Check | Status | Final disposition |
+| --- | --- | --- |
+| Final verification gate | `PASS` | Reviewed docs-only archive commit `2a8db0f`. |
+| Step 11 stable tag created | `PASS` | `phase2b-batch4-step11-final-delivery-stable`. |
+| Stable tag target | `PASS` | `2a8db0f`; tag pointed at HEAD before this archive update. |
+| Post-tag archive effect | `PASS` | This docs-only archive commit advances HEAD; tag remains at `2a8db0f`. |
+| Delivery boundary retained | `PASS` | `ADMIN_ONLY_ISOLATED_DEMO`. |
+| Normal-user artifact isolation | `NOT CLAIMED` | `/api/files/**` owner enforcement remains a known limitation. |
+| New tag created by this archive update | `NO` | No additional tag authorized or created. |
+| External hosted-remote push | `NOT DONE` | Push remains outside this archive. |
+| Step 12 | `NOT AUTHORIZED` | No later-step authority is inferred from the stable tag. |
+
+The earlier `Tag: NOT CREATED` entry records the pre-tag checklist state. This
+post-tag addendum records the subsequently authorized stable tag without
+altering the accepted evidence boundary.

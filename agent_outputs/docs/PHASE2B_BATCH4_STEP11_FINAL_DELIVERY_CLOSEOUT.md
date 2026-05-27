@@ -164,3 +164,24 @@ runtime or database rollback is introduced by this archive.
 Any future work must be separately authorized. In particular, a delivery claim
 requiring normal-user artifact isolation must return for a distinct backend
 GO/NO-GO decision; it cannot be inferred from this administrator-only evidence.
+
+## 8. Stable Tag Post-Tag Archive Addendum (2026-05-27)
+
+```text
+final verification: PASS
+Step 11 stable tag: CREATED
+stable tag: phase2b-batch4-step11-final-delivery-stable -> 2a8db0f
+tag target / HEAD before this archive update: 2a8db0f
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond the tag commit after commit
+new tag created by this archive update: NO
+delivery boundary: ADMIN_ONLY_ISOLATED_DEMO
+normal-user artifact isolation: NOT CLAIMED
+/api/files/** owner-enforcement: KNOWN LIMITATION RETAINED
+external hosted-remote push: NOT DONE
+Step 12: NOT AUTHORIZED
+```
+
+This addendum supersedes the pre-tag `tag: NOT CREATED` record in this closeout
+for the tag lifecycle field only. The tag preserves the accepted docs-only
+delivery evidence baseline at `2a8db0f`; it does not assert normal-user artifact
+isolation or authorize push or Step 12.

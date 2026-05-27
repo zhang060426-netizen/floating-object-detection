@@ -356,3 +356,24 @@ agent_outputs/docs/PHASE2B_BATCH4_STEP11_FINAL_DEMO_CHECKLIST.md
 No Step 11 implementation or backend GO Decision is required under the selected
 boundary. Any later requirement for normal-user artifact isolation or Step 12
 must be separately reviewed and authorized.
+
+## 17. Stable Tag Post-Tag Archive Addendum (2026-05-27)
+
+```text
+Step 11 status: CLOSED / VERIFIED / STABLE TAG CREATED
+final verification: PASS
+stable tag: phase2b-batch4-step11-final-delivery-stable -> 2a8db0f
+tag target / HEAD before this archive update: 2a8db0f
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond the tag commit after commit
+new tag created by this archive update: NO
+delivery boundary: ADMIN_ONLY_ISOLATED_DEMO
+normal-user artifact isolation: NOT CLAIMED
+/api/files/** owner-enforcement: KNOWN LIMITATION RETAINED
+external hosted-remote push: NOT DONE
+Step 12: NOT AUTHORIZED
+```
+
+This addendum records the already-created stable tag after the final
+verification gate passed. It supersedes earlier pre-tag status lines for tag
+existence only; all scope boundaries, known limitations and NO-GO decisions
+remain unchanged.

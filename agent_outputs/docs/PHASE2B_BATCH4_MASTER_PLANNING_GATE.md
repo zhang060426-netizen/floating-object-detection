@@ -806,3 +806,23 @@ agent_outputs/docs/PHASE2B_BATCH4_STEP11_FINAL_DEMO_CHECKLIST.md
 This archive closes only the documentation/evidence lane for the selected
 administrator-only demonstration. It changes no application or helper behavior,
 does not create a tag or push, and does not authorize Step 12.
+
+## Phase 2B Batch4 Step 11 Stable Tag Post-Tag Archive Update (2026-05-27)
+
+```text
+Step 11 status: CLOSED / VERIFIED / STABLE TAG CREATED
+final verification: PASS
+stable tag: phase2b-batch4-step11-final-delivery-stable -> 2a8db0f
+tag target / HEAD before this archive update: 2a8db0f
+post-tag archive outcome: this docs-only archive commit advances HEAD beyond the tag commit after commit
+new tag created by this archive update: NO
+delivery boundary: ADMIN_ONLY_ISOLATED_DEMO
+normal-user artifact isolation: NOT CLAIMED
+/api/files/** owner-enforcement: KNOWN LIMITATION RETAINED
+external hosted-remote push: NOT DONE
+Step 12: NOT AUTHORIZED
+```
+
+The stable tag decision points to the reviewed docs-only final delivery archive
+commit `2a8db0f`. This post-tag archive supersedes the pre-tag Step 11 status,
+does not extend delivery claims, and does not authorize push or Step 12.
