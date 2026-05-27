@@ -111,3 +111,22 @@ Push: NOT DONE
 The earlier `Tag: NOT CREATED` entry records the pre-tag checklist state. This
 post-tag addendum records the subsequently authorized stable tag without
 altering the accepted evidence boundary.
+
+## 8. External Hosted-Remote Push Completion Checklist Addendum (2026-05-27)
+
+| Check | Status | Final disposition |
+| --- | --- | --- |
+| External GitHub remote configured | `PASS` | `https://github.com/zhang060426-netizen/floating-object-detection.git`. |
+| `master` pushed to `external/master` | `PASS` | `2389ef6a20298db5d7ba78c968ebf944212567ba`. |
+| Step1-Step11 stable tags pushed to external | `PASS` | Verified on `external` by matching `phase2b-batch4-step*-stable` tags. |
+| Local `origin` ahead status interpreted | `PASS` | `origin` remains the Chinese-path source repository; `master...origin/master [ahead 16]` does not mean GitHub is unsynchronized. |
+| GitHub large-file warning recorded | `PASS` | `4测试包/测试视频/6.mp4` is 62.34 MB, above GitHub's recommended 50 MB, below 100 MB; push succeeded. |
+| History rewrite | `NO` | Not performed. |
+| Git LFS migration | `NO` | Not performed. |
+| New tag created by this archive update | `NO` | Not authorized or created. |
+| Push performed by this archive update | `NO` | This is docs-only archive work. |
+| Step12 authority | `NO-GO` | `NOT AUTHORIZED`; external push must not be used to infer Step12 authorization. |
+
+This addendum records only external hosted-remote push completion. It does not
+modify business code or helper behavior and does not change the selected Step11
+delivery boundary.

@@ -185,3 +185,27 @@ This addendum supersedes the pre-tag `tag: NOT CREATED` record in this closeout
 for the tag lifecycle field only. The tag preserves the accepted docs-only
 delivery evidence baseline at `2a8db0f`; it does not assert normal-user artifact
 isolation or authorize push or Step 12.
+
+## 9. External Hosted-Remote Push Completion Addendum (2026-05-27)
+
+```text
+external GitHub remote configured: https://github.com/zhang060426-netizen/floating-object-detection.git
+master pushed to external/master: YES
+external/master: 2389ef6a20298db5d7ba78c968ebf944212567ba
+Step1-Step11 stable tags pushed to external: YES
+local origin remains: Chinese-path source repository
+local master...origin/master [ahead 16]: expected local-origin comparison; does not mean GitHub external is unsynchronized
+GitHub push warning: 4测试包/测试视频/6.mp4 is 62.34 MB, above GitHub's recommended 50 MB, below 100 MB; push succeeded
+history rewrite: NOT PERFORMED
+Git LFS migration: NOT PERFORMED
+Step12: NOT AUTHORIZED
+external push implies Step12 authorization: NO
+tag created by this archive update: NO
+push performed by this archive update: NO
+business code modified by this archive update: NO
+helper modified by this archive update: NO
+```
+
+This closeout addendum records the already-completed hosted GitHub push for the
+Batch4 final delivery line. It does not change the accepted demo boundary,
+rewrite history, migrate LFS, create a tag, push again, or authorize Step12.

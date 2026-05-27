@@ -494,3 +494,25 @@ This post-tag archive records the already-created Step 11 stable tag and
 supersedes the earlier pre-tag `tag: NOT CREATED` status. It does not push,
 create another tag, modify product/helper code, claim normal-user artifact
 isolation, or authorize Step 12.
+
+## Phase 2B Batch4 External Hosted-Remote Push Completion Archive (2026-05-27)
+
+```text
+external GitHub remote: https://github.com/zhang060426-netizen/floating-object-detection.git
+master pushed to external/master: YES
+external/master: 2389ef6a20298db5d7ba78c968ebf944212567ba
+Step1-Step11 stable tags pushed to external: YES
+local origin: Chinese-path source repository
+local master...origin/master [ahead 16]: expected local-origin comparison; not a GitHub sync failure
+GitHub push warning: 4测试包/测试视频/6.mp4 is 62.34 MB, above GitHub's recommended 50 MB, below 100 MB; push succeeded
+history rewrite: NOT PERFORMED
+Git LFS migration: NOT PERFORMED
+Step12: NOT AUTHORIZED
+Step12 inferred from external push: NO
+new tag created by this archive update: NO
+push performed by this archive update: NO
+```
+
+This docs-only archive records completed external GitHub synchronization for the
+Batch4 final delivery line. It does not modify application/helper code, rewrite
+history, migrate LFS, create a tag, push again, or authorize Step12.

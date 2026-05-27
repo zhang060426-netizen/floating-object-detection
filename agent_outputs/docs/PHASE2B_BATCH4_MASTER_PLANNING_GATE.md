@@ -826,3 +826,28 @@ Step 12: NOT AUTHORIZED
 The stable tag decision points to the reviewed docs-only final delivery archive
 commit `2a8db0f`. This post-tag archive supersedes the pre-tag Step 11 status,
 does not extend delivery claims, and does not authorize push or Step 12.
+
+## Phase 2B Batch4 External Hosted-Remote Push Completion Archive (2026-05-27)
+
+```text
+archive type: DOCS / SUMMARY ONLY
+external GitHub remote configured: https://github.com/zhang060426-netizen/floating-object-detection.git
+master pushed to external/master: YES
+external/master: 2389ef6a20298db5d7ba78c968ebf944212567ba
+Step1-Step11 stable tags pushed to external: YES
+local origin remains: Chinese-path source repository
+local master...origin/master [ahead 16]: compares against local origin only; does not indicate GitHub external is behind
+GitHub push warning: 4测试包/测试视频/6.mp4 is 62.34 MB, above GitHub's recommended 50 MB, below 100 MB; push completed successfully
+history rewrite: NOT PERFORMED
+Git LFS migration: NOT PERFORMED
+Step12: NOT AUTHORIZED
+external push implies Step12 authorization: NO
+tag created by this archive update: NO
+push performed by this archive update: NO
+business code modified by this archive update: NO
+helper modified by this archive update: NO
+```
+
+This planning-gate update records only the completed external GitHub push state.
+It does not alter the Step11 delivery boundary, does not authorize Step12, and
+must not be used as evidence that Step12 is open.
